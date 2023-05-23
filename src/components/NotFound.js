@@ -7,17 +7,21 @@ function NotFound() {
   const Navigate = useNavigate();
 
   function toHome() {
-    let confirm = window.confirm("Do you want to navigate to home?");
-    if (confirm) {
-      Navigate("/");
-    }
+    // let confirm = window.confirm("Do you want to navigate to home?");
+    // if (confirm) {
+    Navigate("/");
+    // }
   }
   return (
     <ThemeProvider theme={theme}>
-      <div>
+      <div style={{ padding: 10 }}>
         Page not found!
         <br />
-        <Button variant="contained" onClick={toHome}>
+        <Button
+          variant="contained"
+          onClick={toHome}
+          style={{ margin: 10, width: 80 }}
+        >
           Go back to home
         </Button>
       </div>
