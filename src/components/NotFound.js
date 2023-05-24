@@ -12,6 +12,7 @@ function NotFound() {
     Navigate("/");
     // }
   }
+
   return (
     <ThemeProvider theme={theme}>
       <div style={{ padding: 10 }}>
