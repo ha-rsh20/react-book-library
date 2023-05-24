@@ -11,7 +11,7 @@ export default function AddBooks() {
   const Navigate = useNavigate();
   // const [name, setName] = useState("Harsh");
   // const [email, setEmail] = useState("20it033@charusat.edu.in");
-  const [open, setOpen] = useState();
+  const [open, setOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
 
   const initialValues = {
@@ -55,7 +55,7 @@ export default function AddBooks() {
   const onFormSubmit = (values) => {
     // console.log("Name:" + name);
     // console.log("Email:" + email);
-    console.log("On the form submit" + values);
+    console.log("On the form submit", values);
     alert("Form submitted!");
     Navigate("/");
   };
@@ -72,7 +72,6 @@ export default function AddBooks() {
 
   return (
     <div style={{ padding: 10 }}>
-      AddBooks
       <div
         style={{
           padding: 10,
@@ -116,75 +115,78 @@ export default function AddBooks() {
             handleSubmit,
           }) => (
             <form onSubmit={handleSubmit}>
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  marginBottom: 5,
-                }}
-              >
-                <TextField
-                  variant="outlined"
-                  type="text"
-                  label="Name"
-                  id="name"
-                  name="name"
-                  placeholder="Name"
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                />
-                {touched.name && (
-                  <span
-                    style={{
-                      padding: 5,
-                      color: "red",
-                      fontSize: 16,
-                      fontWeight: 500,
-                    }}
-                  >
-                    {errors.name}
-                  </span>
-                )}
-              </div>
-
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  marginBottom: 5,
-                }}
-              >
-                <TextField
-                  variant="outlined"
-                  type="email"
-                  label="Email"
-                  id="email"
-                  name="email"
-                  placeholder="email"
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                />
-                {touched.email && (
-                  <span
-                    style={{
-                      padding: 5,
-                      color: "red",
-                      fontSize: 16,
-                      fontWeight: 500,
-                    }}
-                  >
-                    {errors.email}
-                  </span>
-                )}
-              </div>
-              <Button variant="contained" type="submit" className="">
-                Submit
-              </Button>
+              <ThemeProvider theme={theme}>
+                <div
+                  style={{
+                    padding: 10,
+                    display: "flex",
+                    flexDirection: "column",
+                  }}
+                >
+                  <TextField
+                    type="text"
+                    variant="outlined"
+                    label="Name"
+                    name="name"
+                    placeholder="enter name"
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                  />
+                  {touched.name && (
+                    <span
+                      style={{
+                        padding: 5,
+                        color: "red",
+                        fontSize: 16,
+                        fontWeight: 500,
+                      }}
+                    >
+                      {errors.name}
+                    </span>
+                  )}
+                </div>
+                <div
+                  style={{
+                    padding: 10,
+                    display: "flex",
+                    flexDirection: "column",
+                  }}
+                >
+                  <TextField
+                    type="email"
+                    variant="outlined"
+                    label="Email"
+                    name="email"
+                    placeholder="enter email"
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                  />
+                  {touched.email && (
+                    <span
+                      style={{
+                        padding: 5,
+                        color: "red",
+                        fontSize: 16,
+                        fontWeight: 500,
+                      }}
+                    >
+                      {errors.email}
+                    </span>
+                  )}
+                </div>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  style={{ margin: 10 }}
+                >
+                  submit
+                </Button>
+              </ThemeProvider>
             </form>
           )}
         </Formik>
       </div>
-      {/* <Popover
+      <Popover
         open={open}
         anchorOrigin={{
           vertical: "bottom",
@@ -209,7 +211,7 @@ export default function AddBooks() {
             <ExitToAppIcon />
           </Button>
         </div>
-      </Popover> */}
+      </Popover>
     </div>
   );
 }
