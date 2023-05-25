@@ -6,6 +6,7 @@ import TextField from "@mui/material/TextField";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import { Formik } from "formik";
 import * as Yup from "yup";
+import axios from "axios";
 
 export default function AddBooks() {
   const Navigate = useNavigate();
@@ -56,8 +57,21 @@ export default function AddBooks() {
     // console.log("Name:" + name);
     // console.log("Email:" + email);
     console.log("On the form submit", values);
-    alert("Form submitted!");
-    Navigate("/");
+
+    // const requestData = {
+    //   userName: values.name,
+    //   userEmail: values.email,
+    // }
+
+    // axios.post("https://jsonplaceholder.typicode.com/posts",requestData);
+    axios
+      .post("https://jsonplaceholder.typicode.com/posts", values)
+      .then((res) => {
+        if (res.status === 201) {
+          console.log(res.data.id);
+          alert("Success on form submission!");
+        }
+      });
   };
 
   const handleClick = (event) => {
