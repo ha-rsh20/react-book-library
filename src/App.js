@@ -2,6 +2,7 @@ import AddBooks from "./components/AddBooks";
 import Home from "./components/Home";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import NotFound from "./components/NotFound";
+import GetBooks from "./components/GetBooks";
 
 function App() {
   return (
@@ -36,6 +37,11 @@ function App() {
                   </a>
                 </li>
                 <li className="nav-item">
+                  <a className="nav-link" href="/getBooks">
+                    get books
+                  </a>
+                </li>
+                <li className="nav-item">
                   <a className="nav-link" href="/xyz">
                     root
                   </a>
@@ -48,6 +54,7 @@ function App() {
           <Route path="/add" element={<AddBooks />} />
           <Route path="/" element={<Home />} />
           <Route path="*" element={<NotFound />} />
+          <Route path="/getBooks" element={<GetBooks />} />
         </Routes>
       </BrowserRouter>
     </div>

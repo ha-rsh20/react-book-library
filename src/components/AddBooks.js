@@ -7,6 +7,8 @@ import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import { Formik } from "formik";
 import * as Yup from "yup";
 import axios from "axios";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function AddBooks() {
   const Navigate = useNavigate();
@@ -14,6 +16,7 @@ export default function AddBooks() {
   // const [email, setEmail] = useState("20it033@charusat.edu.in");
   const [open, setOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [user, setUser] = useState([]);
 
   const initialValues = {
     name: "",
@@ -27,9 +30,7 @@ export default function AddBooks() {
   //useeffect:if array is empty means when page will be loaded it will excuted
   //useeffect:if array is filled with variables,it will check changes in varibles if it will be then will be excuted
   useEffect(() => {
-    console.log("Hello!");
     // console.log("New value of name:" + name);
-
     // return () => {
     //   console.log("Old value of name:" + name);
     // };
@@ -69,8 +70,30 @@ export default function AddBooks() {
       .then((res) => {
         if (res.status === 201) {
           console.log(res.data.id);
-          alert("Success on form submission!");
+          // toast("Success on form submission!");
+          toast.success("Success on form submission!", {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "dark",
+          });
         }
+      })
+      .catch((err) => {
+        toast.error("Error in form submission!", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+        });
       });
   };
 
@@ -82,6 +105,37 @@ export default function AddBooks() {
   const handleClose = (event) => {
     setAnchorEl(event.currentTarget);
     setOpen(false);
+  };
+
+  const deleteData = () => {
+    axios
+      .delete("https://jsonplaceholder.typicode.com/posts/1")
+      .then((res) => {
+        if (res.status === 200) {
+          toast.success("Data deleted!", {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "dark",
+          });
+        }
+      })
+      .catch((err) => {
+        toast.error("Error in deleting data!", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+        });
+      });
   };
 
   return (
@@ -195,6 +249,13 @@ export default function AddBooks() {
                 >
                   submit
                 </Button>
+                <Button
+                  onClick={deleteData}
+                  variant="contained"
+                  style={{ margin: 10 }}
+                >
+                  delete
+                </Button>
               </ThemeProvider>
             </form>
           )}
@@ -226,6 +287,7 @@ export default function AddBooks() {
           </Button>
         </div>
       </Popover>
+      <ToastContainer />
     </div>
   );
 }
