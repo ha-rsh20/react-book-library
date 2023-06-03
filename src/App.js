@@ -2,60 +2,36 @@ import AddBooks from "./components/AddBooks";
 import Home from "./components/Home";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import NotFound from "./components/NotFound";
-import GetBooks from "./components/GetBooks";
+import GetBook from "./components/GetBook";
+import Register from "./components/Register";
+import Login from "./components/Login";
+import Protected from "./components/Protected";
+import NavBar from "./components/NavBar";
+import Footer from "./components/Footer";
+import Cart from "./components/Cart";
+import AddUser from "./components/AddUser";
+import GetUser from "./components/GetUser";
 
 function App() {
   return (
     <div>
       <BrowserRouter>
-        <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
-          <div className="container-fluid">
-            <a className="navbar-brand" href="/">
-              VBook
-            </a>
-            <button
-              className="navbar-toggler"
-              type="button"
-              data-bs-toggle="collapse"
-              data-bs-target="#navbarNav"
-              aria-controls="navbarNav"
-              aria-expanded="false"
-              aria-label="Toggle navigation"
-            >
-              <span className="navbar-toggler-icon"></span>
-            </button>
-            <div className="collapse navbar-collapse" id="navbarNav">
-              <ul className="navbar-nav">
-                <li className="nav-item">
-                  <a className="nav-link" aria-current="page" href="/">
-                    Home
-                  </a>
-                </li>
-                <li className="nav-item">
-                  <a className="nav-link" href="/add">
-                    AddBooks
-                  </a>
-                </li>
-                <li className="nav-item">
-                  <a className="nav-link" href="/getBooks">
-                    get books
-                  </a>
-                </li>
-                <li className="nav-item">
-                  <a className="nav-link" href="/xyz">
-                    root
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </nav>
+        <NavBar />
         <Routes>
-          <Route path="/add" element={<AddBooks />} />
+          <Route path="/login" element={<Login />} />
+          <Route
+            path="/addBooks"
+            element={<Protected Component={AddBooks} />}
+          />
           <Route path="/" element={<Home />} />
+          <Route path="/getBooks" element={<Protected Component={GetBook} />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/addUser" element={<AddUser />} />
+          <Route path="/getUser" element={<GetUser />} />
           <Route path="*" element={<NotFound />} />
-          <Route path="/getBooks" element={<GetBooks />} />
         </Routes>
+        <Footer />
       </BrowserRouter>
     </div>
   );
