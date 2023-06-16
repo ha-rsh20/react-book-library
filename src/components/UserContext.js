@@ -6,6 +6,8 @@ export const AppWrapper = ({ children }) => {
   const [userId, setUserId] = useState();
   const [userFirstName, setUserFirstName] = useState("user");
   const [userLastName, setUserLastName] = useState("user");
+  const [userRole, setUserRole] = useState("Buyer");
+
   return (
     <div>
       <UserContext.Provider
@@ -16,6 +18,8 @@ export const AppWrapper = ({ children }) => {
           setUserLastName,
           userId,
           setUserId,
+          userRole,
+          setUserRole,
         }}
       >
         {children}

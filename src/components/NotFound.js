@@ -7,10 +7,7 @@ function NotFound() {
   const Navigate = useNavigate();
 
   function toHome() {
-    // let confirm = window.confirm("Do you want to navigate to home?");
-    // if (confirm) {
     Navigate("/");
-    // }
   }
 
   return (

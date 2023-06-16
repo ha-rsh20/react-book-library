@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { Button, ThemeProvider } from "@mui/material";
 import { theme } from "../mui_style";
 import TextField from "@mui/material/TextField";
@@ -10,72 +9,62 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function AddBooks() {
-  const Navigate = useNavigate();
-  // const [name, setName] = useState("Harsh");
-  // const [email, setEmail] = useState("20it033@charusat.edu.in");
-  const [user, setUser] = useState([]);
-  const [id, setId] = useState([]);
+  const [book, setBook] = useState([]);
   const initialValues = {
     id: "",
+    sid: "",
     name: "",
     price: "",
     description: "",
+    pages: "",
+    cover: "",
   };
 
+  const [base64Image, setBase64Image] = useState("");
   const validationSchema = Yup.object().shape({
-    name: Yup.string().min(3, "Enter more than 3 characters"),
-    email: Yup.string().email("Enter valid email address"),
+    name: Yup.string()
+      .required("Please type title of the book")
+      .min(3, "Enter more than 3 characters"),
+    price: Yup.string().required("Please enter price for the book"),
+    description: Yup.string()
+      .required("Please type description of the book")
+      .min(20, "Enter more than 20 characters"),
+    pages: Yup.string().required("Please enter no of pages of the book"),
   });
-  //useeffect:if array is empty means when page will be loaded it will excuted
-  //useeffect:if array is filled with variables,it will check changes in varibles if it will be then will be excuted
+
   useEffect(() => {
-    // console.log("New value of name:" + name);
-    // return () => {
-    //   console.log("Old value of name:" + name);
-    // };
     axios
       .get("http://localhost:4000/app/showAllBooks")
       .then((res) => {
-        setUser(res.data);
-        //console.log(user.length);
+        setBook(res.data);
       })
       .catch();
   }, []);
-  function toHome() {
-    //alert("You want to home page!");
-    //let name = prompt("What is your name?");
-    //console.log(name);
-    //console.log(window);
-    // let confirm = window.confirm("Do you want to navigate to home?");
-    // if (confirm) {
-    Navigate("/");
-    // }
-    // console.log(`name:${name},email:${email}`);
-  }
-  // function openPopover() {
-  //   if (open) {
-  //     setOpen(false);
-  //   } else {
-  //     setOpen(true);
-  //   }
-  // }
-  const onFormSubmit = (values, { resetForm }) => {
-    // console.log("Name:" + name);
-    // console.log("Email:" + email);
-    console.log("On the form submit", values);
-    // const requestData = {
-    //   userName: values.name,
-    //   userEmail: values.email,
-    // }
 
-    // axios.post("https://jsonplaceholder.typicode.com/posts",requestData);
-    values.id = user[user.length - 1].id + 1;
+  const handleCoverUpload = (event) => {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+
+    reader.onloadend = () => {
+      const base64String = reader.result;
+      setBase64Image(base64String);
+    };
+
+    if (file) {
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const onFormSubmit = (values, { resetForm }) => {
+    values.id = book[book.length - 1].id + 1;
+    if (localStorage.getItem("id")) {
+      values.sid = localStorage.getItem("id");
+    }
+    values.cover = base64Image;
     axios
       .post("http://localhost:4000/app/addBook", values)
       .then((res) => {
         if (res.status === 201) {
-          console.log(res.data.id);
-          // toast("Success on form submission!");
           toast.success("Book added!", {
             position: "top-right",
             autoClose: 3000,
@@ -160,7 +149,7 @@ export default function AddBooks() {
                   }}
                 >
                   <TextField
-                    type="float"
+                    type="number"
                     variant="outlined"
                     label="Price"
                     name="price"
@@ -170,7 +159,7 @@ export default function AddBooks() {
                     onBlur={formik.handleBlur}
                     required
                   />
-                  {formik.touched.email && (
+                  {formik.touched.price && (
                     <span
                       style={{
                         padding: 5,
@@ -179,7 +168,7 @@ export default function AddBooks() {
                         fontWeight: 500,
                       }}
                     >
-                      {formik.errors.email}
+                      {formik.errors.price}
                     </span>
                   )}
                 </div>
@@ -201,7 +190,7 @@ export default function AddBooks() {
                     onBlur={formik.handleBlur}
                     required
                   />
-                  {formik.touched.email && (
+                  {formik.touched.description && (
                     <span
                       style={{
                         padding: 5,
@@ -210,10 +199,63 @@ export default function AddBooks() {
                         fontWeight: 500,
                       }}
                     >
-                      {formik.errors.email}
+                      {formik.errors.description}
                     </span>
                   )}
                 </div>
+                <div
+                  style={{
+                    padding: 10,
+                    display: "flex",
+                    flexDirection: "column",
+                  }}
+                >
+                  <TextField
+                    type="number"
+                    variant="outlined"
+                    label="Pages"
+                    name="pages"
+                    placeholder="enter pages"
+                    value={formik.values.pages}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    required
+                  />
+                  {formik.touched.pages && (
+                    <span
+                      style={{
+                        padding: 5,
+                        color: "red",
+                        fontSize: 16,
+                        fontWeight: 500,
+                      }}
+                    >
+                      {formik.errors.pages}
+                    </span>
+                  )}
+                </div>
+
+                <div
+                  style={{
+                    padding: 10,
+                    display: "flex",
+                    flexDirection: "column",
+                  }}
+                >
+                  <TextField
+                    type="file"
+                    variant="outlined"
+                    label="Cover page"
+                    name="cover"
+                    placeholder="enter cover page"
+                    onChange={handleCoverUpload}
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                    required
+                  />
+                </div>
+
                 <Button
                   type="submit"
                   variant="contained"

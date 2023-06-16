@@ -8,21 +8,28 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import TextField from "@mui/material/TextField";
 import { useNavigate } from "react-router";
-import { useUserContext } from "./UserContext";
+import { useDispatch } from "react-redux";
+import { updateUserFirstName } from "../state/slice/userSlice";
+import { updateUserLastName } from "../state/slice/userSlice";
+import { updateUserRole } from "../state/slice/userSlice";
+import { updateUserId } from "../state/slice/userSlice";
+import { updateUserLoggedIn } from "../state/slice/userSlice";
 
 function Login() {
   const [users, setUsers] = useState([]);
   let [user, setUser] = useState("");
-  const { setUserFirstName } = useUserContext();
-  const { setUserId } = useUserContext();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
   const initialValues = {
     email: "",
     password: "",
   };
   const validationSchema = Yup.object().shape({
-    name: Yup.string().min(3, "Enter more than 3 characters"),
-    email: Yup.string().email("Enter valid email address"),
+    email: Yup.string()
+      .required("Please type your email")
+      .email("Enter valid email address"),
+    password: Yup.string().required("Please type your password"),
   });
 
   useEffect(() => {
@@ -32,7 +39,7 @@ function Login() {
         setUsers(res.data);
       })
       .catch((err) => {
-        toast.error("Error in login!", {
+        toast.error("Netowrk error!", {
           position: "top-right",
           autoClose: 3000,
           hideProgressBar: false,
@@ -44,35 +51,50 @@ function Login() {
         });
       });
   });
+  const setUp = (fname, lname, id, role) => {
+    dispatch(updateUserFirstName(fname));
+    dispatch(updateUserLastName(lname));
+    dispatch(updateUserRole(role));
+    dispatch(updateUserId(id));
+    dispatch(updateUserLoggedIn(true));
+    localStorage.setItem("loggedIn", true);
+    localStorage.setItem("firstname", fname);
+    localStorage.setItem("lastname", lname);
+    localStorage.setItem("id", id);
+    localStorage.setItem("role", role);
+  };
   const onLogin = (values) => {
-    // axios
-    //   .get("http://localhost:4000/app/showAllUsers")
-    //   .then((res) => {
-    //     if (res.status === 200) {
-    //       console.log("Success");
-    //     }
-    //   })
-    //   .catch((err) => {
-    //     console.log(err);
-    //   });
-
-    //console.log(values.email + " " + values.password);
     user = users.filter((u) => u.email.includes(values.email));
-    console.log(user);
-
-    if (
+    if (user.length === 0) {
+      toast.error("Email not registered!", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
+    } else if (
       user[0].email === values.email &&
       user[0].password === values.password
     ) {
-      localStorage.setItem("login", true);
-      localStorage.setItem("firstname", user[0].firstname);
-      localStorage.setItem("lastname", user[0].lastname);
-      localStorage.setItem("id", user[0].id);
-      setUserFirstName(user[0].firstname);
-      setUserId(user[0].id);
+      setUp(user[0].firstname, user[0].lastname, user[0].id, user[0].role);
       navigate("/");
+    } else if (user[0].password !== values.password) {
+      toast.error("Invalid Password!", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
     } else {
-      toast.error("Error in login!", {
+      toast.error("Network Error!", {
         position: "top-right",
         autoClose: 3000,
         hideProgressBar: false,
@@ -83,10 +105,6 @@ function Login() {
         theme: "dark",
       });
     }
-
-    //setUser(users.filter((u) => u.email.includes(values.email)));
-    //console.log(user);
-    //localStorage.setItem("login", true);
   };
   return (
     <div
@@ -160,6 +178,18 @@ function Login() {
                   onBlur={handleBlur}
                   required
                 />
+                {touched.password && (
+                  <span
+                    style={{
+                      padding: 5,
+                      color: "red",
+                      fontSize: 16,
+                      fontWeight: 500,
+                    }}
+                  >
+                    {errors.password}
+                  </span>
+                )}
               </div>
 
               <Button type="submit" variant="contained" style={{ margin: 10 }}>

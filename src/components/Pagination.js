@@ -10,7 +10,7 @@ function Pagination({ postPerPage, totalPosts, paginate, currentPage }) {
     }
   };
   const goToNextPage = () => {
-    if (currentPage !== totalPages) {
+    if (currentPage !== totalPages && currentPage < totalPages) {
       paginate(currentPage + 1);
     }
   };

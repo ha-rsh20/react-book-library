@@ -1,60 +1,131 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
+import { ToastContainer, toast } from "react-toastify";
+import { useNavigate, useParams } from "react-router";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  updateUserFirstName,
+  updateUserId,
+  updateUserLastName,
+  updateUserRole,
+} from "../state/slice/userSlice";
 import { Button, ThemeProvider } from "@mui/material";
 import { theme } from "../mui_style";
 import TextField from "@mui/material/TextField";
 import { Formik } from "formik";
-import * as Yup from "yup";
-import axios from "axios";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
-import Select from "@mui/material/Select";
+import * as Yup from "yup";
 
-function AddUser() {
-  const [user, setUser] = useState([]);
-  const initialValues = {
-    id: "",
+function UpdateProfile() {
+  const [pass, setPass] = useState();
+  const [role, setRole] = useState();
+  let userSId = useSelector((state) => state.users.id);
+  const { id } = useParams();
+  let userRole = useSelector((state) => state.users.role);
+  const navigate = useNavigate();
+
+  const dispatch = useDispatch();
+  let initialValues = {
     firstname: "",
     lastname: "",
     email: "",
     role: "",
     password: "",
-    confirm_password: "",
   };
-  const getCharacterValidationError = (str: string) => {
-    return `Your password must have at least 1 ${str} character`;
-  };
-  const validationSchema = Yup.object().shape({
-    firstname: Yup.string().min(3, "Enter more than 3 characters"),
-    lastname: Yup.string().min(3, "Enter more than 3 characters"),
-    email: Yup.string().email("Enter valid email address"),
-    password: Yup.string()
-      .min(8, "Password must have at least 8 characters")
-      .matches(/[0-9]/, getCharacterValidationError("digit"))
-      .matches(/[a-z]/, getCharacterValidationError("lowercase"))
-      .matches(/[A-Z]/, getCharacterValidationError("uppercase")),
-    confirm_password: Yup.string()
-      .required("Please re-type your password")
-      .oneOf([Yup.ref("password")], "Passwords does not match"),
-  });
+  const Roles = [
+    {
+      value: "Admin",
+      label: "Admin",
+    },
+    {
+      value: "Seller",
+      label: "Seller",
+    },
+    {
+      value: "Buyer",
+      label: "Buyer",
+    },
+  ];
 
+  const validationSchema = Yup.object().shape({
+    firstname: Yup.string()
+      .required("Please type your firstname")
+      .min(3, "Enter more than 3 characters"),
+    lastname: Yup.string()
+      .required("Please type your lastname")
+      .min(3, "Enter more than 3 characters"),
+    email: Yup.string()
+      .required("Please type your email")
+      .email("Enter valid email address"),
+    password: Yup.string().required("Please type your password"),
+  });
   useEffect(() => {
+    if (localStorage.getItem("id") && id === undefined) {
+      dispatch(updateUserId(localStorage.getItem("id")));
+      userSId = localStorage.getItem("id");
+    } else {
+      dispatch(updateUserId(id));
+      userSId = id;
+    }
+    if (localStorage.getItem("role")) {
+      userRole = localStorage.getItem("role");
+      dispatch(updateUserRole(localStorage.getItem("role")));
+    }
     axios
-      .get("http://localhost:4000/app/showAllUsers")
+      .get("http://localhost:4000/app/showUser/" + userSId)
       .then((res) => {
-        setUser(res.data);
+        if (res.status === 200) {
+          initialValues.firstname = res.data.firstname;
+          initialValues.lastname = res.data.lastname;
+          initialValues.email = res.data.email;
+          initialValues.role = res.data.role;
+          setPass(res.data.password);
+        }
       })
-      .catch();
+      .catch((err) => {
+        console.log(err);
+      });
   }, []);
 
-  const onFormSubmit = (values, { resetForm }) => {
-    values.id = user[user.length - 1].id + 1;
-    axios
-      .post("http://localhost:4000/app/addUser", values)
-      .then((res) => {
-        if (res.status === 201) {
-          toast.success("User added!", {
+  const setupUpdate = (fname, lname, role) => {
+    dispatch(updateUserFirstName(fname));
+    dispatch(updateUserLastName(lname));
+    dispatch(updateUserRole(role));
+    localStorage.setItem("firstname", fname);
+    localStorage.setItem("lastname", lname);
+    localStorage.setItem("role", role);
+  };
+
+  const onUpdate = (values) => {
+    if (pass === values.password) {
+      axios
+        .put("http://localhost:4000/app/updateUser/" + userSId, values)
+        .then((res) => {
+          if (res.status === 200) {
+            {
+              id === undefined ? (
+                setupUpdate(values.firstname, values.lastname, values.role)
+              ) : (
+                <div></div>
+              );
+            }
+            toast.success("Updated successfully!", {
+              position: "top-right",
+              autoClose: 3000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+              theme: "dark",
+            });
+          }
+          navigate("/");
+        })
+        .catch((err) => {
+          console.log(err);
+          toast.error("Error occured to update!", {
             position: "top-right",
             autoClose: 3000,
             hideProgressBar: false,
@@ -64,22 +135,21 @@ function AddUser() {
             progress: undefined,
             theme: "dark",
           });
-        }
-      })
-      .catch((err) => {
-        toast.error("Error to add User!", {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "dark",
         });
+    } else {
+      toast.error("Wrong password!", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
       });
-    resetForm({ values: "" });
+    }
   };
+
   return (
     <div style={{ padding: 10 }}>
       <div
@@ -93,7 +163,7 @@ function AddUser() {
         <Formik
           initialValues={initialValues}
           validationSchema={validationSchema}
-          onSubmit={onFormSubmit}
+          onSubmit={onUpdate}
         >
           {(formik) => (
             <form onSubmit={formik.handleSubmit}>
@@ -116,7 +186,7 @@ function AddUser() {
                     onBlur={formik.handleBlur}
                     required
                   />
-                  {formik.touched.name && (
+                  {formik.touched.firstname && (
                     <span
                       style={{
                         padding: 5,
@@ -125,7 +195,7 @@ function AddUser() {
                         fontWeight: 500,
                       }}
                     >
-                      {formik.errors.name}
+                      {formik.errors.firstname}
                     </span>
                   )}
                 </div>
@@ -147,7 +217,7 @@ function AddUser() {
                     onBlur={formik.handleBlur}
                     required
                   />
-                  {formik.touched.name && (
+                  {formik.touched.lastname && (
                     <span
                       style={{
                         padding: 5,
@@ -156,7 +226,7 @@ function AddUser() {
                         fontWeight: 500,
                       }}
                     >
-                      {formik.errors.name}
+                      {formik.errors.lastname}
                     </span>
                   )}
                 </div>
@@ -191,31 +261,36 @@ function AddUser() {
                     </span>
                   )}
                 </div>
-                <div
-                  style={{
-                    padding: 10,
-                    display: "flex",
-                    flexDirection: "column",
-                  }}
-                >
-                  <InputLabel id="role" required>
-                    Role
-                  </InputLabel>
-                  <Select
-                    labelId="role-select"
-                    id="role-select"
-                    label="Role"
-                    name="role"
-                    value={formik.values.role}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    required
+                {userRole === "Admin" ? (
+                  <div
+                    style={{
+                      padding: 10,
+                      display: "flex",
+                      flexDirection: "column",
+                    }}
                   >
-                    <MenuItem value="Admin">Admin</MenuItem>
-                    <MenuItem value="Seller">Seller</MenuItem>
-                    <MenuItem value="Buyer">Buyer</MenuItem>
-                  </Select>
-                </div>
+                    <TextField
+                      variant="filled"
+                      label="Role"
+                      name="role"
+                      defaultValue="Buyer"
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      value={formik.values.role}
+                      select
+                      required
+                    >
+                      {Roles.map((option) => (
+                        <MenuItem key={option.value} value={option.value}>
+                          {option.label}
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                  </div>
+                ) : (
+                  <div></div>
+                )}
+
                 <div
                   style={{
                     padding: 10,
@@ -247,43 +322,12 @@ function AddUser() {
                     </span>
                   )}
                 </div>
-                <div
-                  style={{
-                    padding: 10,
-                    display: "flex",
-                    flexDirection: "column",
-                  }}
-                >
-                  <TextField
-                    type="password"
-                    variant="outlined"
-                    label="Confitm password"
-                    name="confirm_password"
-                    placeholder="confirm password"
-                    value={formik.values.confirm_password}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    required
-                  />
-                  {formik.touched.confirm_password && (
-                    <span
-                      style={{
-                        padding: 5,
-                        color: "red",
-                        fontSize: 16,
-                        fontWeight: 500,
-                      }}
-                    >
-                      {formik.errors.confirm_password}
-                    </span>
-                  )}
-                </div>
                 <Button
                   type="submit"
                   variant="contained"
                   style={{ margin: 10 }}
                 >
-                  add user
+                  Update
                 </Button>
               </ThemeProvider>
             </form>
@@ -296,4 +340,4 @@ function AddUser() {
   );
 }
 
-export default AddUser;
+export default UpdateProfile;

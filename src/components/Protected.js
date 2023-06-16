@@ -1,15 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
 import Login from "./Login";
 
 function Protected(props) {
-  const navigate = useNavigate();
   const { Component } = props;
   const [log, setLog] = useState();
 
   useEffect(() => {
-    let login = localStorage.getItem("login");
-    //console.log("Protected login:", login);
+    let login = localStorage.getItem("loggedIn");
     if (login === "false") {
       setLog("false");
     } else {

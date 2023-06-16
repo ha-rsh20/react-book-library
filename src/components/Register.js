@@ -8,9 +8,9 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import TextField from "@mui/material/TextField";
 import { useNavigate } from "react-router";
-import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
-import Select from "@mui/material/Select";
+import { useDispatch, useSelector } from "react-redux";
+import { updateUserRole } from "../state/slice/userSlice";
 
 function Register() {
   const [user, setUser] = useState();
@@ -20,61 +20,71 @@ function Register() {
     firstname: "",
     lastname: "",
     email: "",
-    role: "",
+    role: "Buyer",
     password: "",
     confirm_password: "",
   };
-
+  const userRole = useSelector((state) => state.users.role);
+  const dispatch = useDispatch();
   const getCharacterValidationError = (str: string) => {
     return `Your password must have at least 1 ${str} character`;
   };
 
+  const Roles = [
+    {
+      value: "Admin",
+      label: "Admin",
+    },
+    {
+      value: "Seller",
+      label: "Seller",
+    },
+    {
+      value: "Buyer",
+      label: "Buyer",
+    },
+  ];
+
   const validationSchema = Yup.object().shape({
-    firstname: Yup.string().min(3, "Enter more than 3 characters"),
-    lastname: Yup.string().min(3, "Enter more than 3 characters"),
-    email: Yup.string().email("Enter valid email address"),
+    firstname: Yup.string()
+      .required("Please type your firstname")
+      .min(3, "Enter more than 3 characters"),
+    lastname: Yup.string()
+      .required("Please type your lastname")
+      .min(3, "Enter more than 3 characters"),
+    email: Yup.string()
+      .required("Please type your email")
+      .email("Enter valid email address"),
     password: Yup.string()
+      .required("You need to create password for your account!")
       .min(8, "Password must have at least 8 characters")
       .matches(/[0-9]/, getCharacterValidationError("digit"))
       .matches(/[a-z]/, getCharacterValidationError("lowercase"))
       .matches(/[A-Z]/, getCharacterValidationError("uppercase")),
     confirm_password: Yup.string()
-      .required("Please re-type your password")
+      .required("You need to re-type your password")
       .oneOf([Yup.ref("password")], "Passwords does not match"),
   });
 
   useEffect(() => {
-    // console.log("New value of name:" + name);
-    // return () => {
-    //   console.log("Old value of name:" + name);
-    // };
+    if (localStorage.getItem("role")) {
+      dispatch(updateUserRole(localStorage.getItem("role")));
+    }
     axios
       .get("http://localhost:4000/app/showAllUsers")
       .then((res) => {
         setUser(res.data);
-        //console.log(user);
-        //console.log(user.length);
       })
       .catch();
   }, []);
 
   const onFormSubmit = (values) => {
-    // console.log("Name:" + name);
-    // console.log("Email:" + email);
-    console.log("On the form submit", values);
     values.id = user[user.length - 1].id + 1;
-    // const requestData = {
-    //   userName: values.name,
-    //   userEmail: values.email,
-    // }
 
-    // axios.post("https://jsonplaceholder.typicode.com/posts",requestData);
     axios
       .post("http://localhost:4000/app/addUser", values)
       .then((res) => {
         if (res.status === 201) {
-          console.log(res.data.id);
-          // toast("Success on form submission!");
           toast.success("Registered successfully!", {
             position: "top-right",
             autoClose: 3000,
@@ -117,16 +127,8 @@ function Register() {
         validationSchema={validationSchema}
         onSubmit={onFormSubmit}
       >
-        {({
-          value,
-          errors,
-          touched,
-          isSubmitting,
-          handleChange,
-          handleBlur,
-          handleSubmit,
-        }) => (
-          <form onSubmit={handleSubmit}>
+        {(formik) => (
+          <form onSubmit={formik.handleSubmit}>
             <ThemeProvider theme={theme}>
               <div
                 style={{
@@ -141,11 +143,12 @@ function Register() {
                   label="First Name"
                   name="firstname"
                   placeholder="enter first-name"
-                  onChange={handleChange}
-                  onBlur={handleBlur}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  value={formik.values.firstname}
                   required
                 />
-                {touched.name && (
+                {formik.touched.firstname && (
                   <span
                     style={{
                       padding: 5,
@@ -154,7 +157,7 @@ function Register() {
                       fontWeight: 500,
                     }}
                   >
-                    {errors.name}
+                    {formik.errors.firstname}
                   </span>
                 )}
               </div>
@@ -171,11 +174,12 @@ function Register() {
                   label="Last name"
                   name="lastname"
                   placeholder="enter last-name"
-                  onChange={handleChange}
-                  onBlur={handleBlur}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  value={formik.values.lastname}
                   required
                 />
-                {touched.name && (
+                {formik.touched.lastname && (
                   <span
                     style={{
                       padding: 5,
@@ -184,7 +188,7 @@ function Register() {
                       fontWeight: 500,
                     }}
                   >
-                    {errors.name}
+                    {formik.errors.lastname}
                   </span>
                 )}
               </div>
@@ -201,11 +205,12 @@ function Register() {
                   label="Email"
                   name="email"
                   placeholder="enter email"
-                  onChange={handleChange}
-                  onBlur={handleBlur}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  value={formik.values.email}
                   required
                 />
-                {touched.email && (
+                {formik.touched.email && (
                   <span
                     style={{
                       padding: 5,
@@ -214,10 +219,11 @@ function Register() {
                       fontWeight: 500,
                     }}
                   >
-                    {errors.email}
+                    {formik.errors.email}
                   </span>
                 )}
               </div>
+
               <div
                 style={{
                   padding: 10,
@@ -225,23 +231,30 @@ function Register() {
                   flexDirection: "column",
                 }}
               >
-                <InputLabel id="role" required>
-                  Role
-                </InputLabel>
-                <Select
-                  labelId="role-select"
-                  id="role-select"
+                <TextField
+                  variant="filled"
                   label="Role"
                   name="role"
-                  onChange={handleChange}
-                  onBlur={handleBlur}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  value={formik.values.role}
+                  select
                   required
                 >
-                  <MenuItem value=""></MenuItem>
-                  <MenuItem value="Admin">Admin</MenuItem>
-                  <MenuItem value="Seller">Seller</MenuItem>
-                  <MenuItem value="Buyer">Buyer</MenuItem>
-                </Select>
+                  {userRole === "Admin"
+                    ? Roles.map((option) => (
+                        <MenuItem key={option.value} value={option.value}>
+                          {option.label}
+                        </MenuItem>
+                      ))
+                    : Roles.filter((role) => role.label !== "Admin").map(
+                        (option) => (
+                          <MenuItem key={option.value} value={option.value}>
+                            {option.label}
+                          </MenuItem>
+                        )
+                      )}
+                </TextField>
               </div>
               <div
                 style={{
@@ -256,11 +269,12 @@ function Register() {
                   label="Password"
                   name="password"
                   placeholder="enter password"
-                  onChange={handleChange}
-                  onBlur={handleBlur}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  value={formik.values.password}
                   required
                 />
-                {touched.password && (
+                {formik.touched.password && (
                   <span
                     style={{
                       padding: 5,
@@ -269,7 +283,7 @@ function Register() {
                       fontWeight: 500,
                     }}
                   >
-                    {errors.password}
+                    {formik.errors.password}
                   </span>
                 )}
               </div>
@@ -286,11 +300,12 @@ function Register() {
                   label="Confitm password"
                   name="confirm_password"
                   placeholder="confirm password"
-                  onChange={handleChange}
-                  onBlur={handleBlur}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  value={formik.values.confirm_password}
                   required
                 />
-                {touched.confirm_password && (
+                {formik.touched.confirm_password && (
                   <span
                     style={{
                       padding: 5,
@@ -299,7 +314,7 @@ function Register() {
                       fontWeight: 500,
                     }}
                   >
-                    {errors.confirm_password}
+                    {formik.errors.confirm_password}
                   </span>
                 )}
               </div>

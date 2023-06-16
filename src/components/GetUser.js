@@ -6,24 +6,52 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { theme } from "../mui_style";
 import Pagination from "./Pagination";
+import { useNavigate } from "react-router";
+import MenuItem from "@mui/material/MenuItem";
 
 function GetUser() {
   const [user, setUser] = useState([]);
   const [search, setSearch] = useState("");
-  const dataFetch = useRef(false);
   const [page, setPage] = useState(1);
+  const navigate = useNavigate();
 
-  const postPerPage = 5;
+  const [postPerPage, setPostPerPage] = useState("5");
   const indexOfLastPost = page * postPerPage;
   const indexOfFirstPost = indexOfLastPost - postPerPage;
-  let currentPosts = user.slice(indexOfFirstPost, indexOfLastPost);
+  let [currentPosts, setCurrentPosts] = useState();
+  currentPosts = user
+    .filter(
+      (user) =>
+        user.firstname.toLowerCase().includes(search) ||
+        user.lastname.toLowerCase().includes(search) ||
+        user.email.toLowerCase().includes(search)
+    )
+    .slice(indexOfFirstPost, indexOfLastPost);
+
+  const postPerPageA = [
+    {
+      value: 5,
+      label: "5",
+    },
+    {
+      value: 10,
+      label: "10",
+    },
+    {
+      value: 15,
+      label: "15",
+    },
+  ];
+
+  const handlePostPerPage = (e) => {
+    setPostPerPage(e.target.value);
+  };
 
   const paginate = (pageNumber) => {
     setPage(pageNumber);
   };
 
   const onDelete = (id) => {
-    //console.log(id);
     axios
       .delete("http://localhost:4000/app/deleteUser/" + id)
       .then((res) => {
@@ -38,7 +66,8 @@ function GetUser() {
             progress: undefined,
             theme: "dark",
           });
-          currentPosts = currentPosts.filter((book) => book.id !== id);
+          setUser(user.filter((user) => user.id !== id));
+          setCurrentPosts(currentPosts.filter((book) => book.id !== id));
         }
       })
       .catch((err) => {
@@ -53,7 +82,6 @@ function GetUser() {
           theme: "dark",
         });
       });
-    currentPosts.filter((user) => user.id !== id);
   };
 
   useEffect(() => {
@@ -61,7 +89,6 @@ function GetUser() {
       .get("http://localhost:4000/app/showAllUsers")
       .then((res) => {
         setUser(res.data);
-        //console.log(user);
         toast.success("Success on fetching user details!", {
           position: "top-right",
           autoClose: 3000,
@@ -106,12 +133,29 @@ function GetUser() {
           />
         </div>
       </div>
-      <Pagination
-        postPerPage={postPerPage}
-        totalPosts={user.length}
-        paginate={paginate}
-        currentPage={page}
-      />
+      <div style={{ margin: 10, display: "flex", justifyContent: "center" }}>
+        <TextField
+          id="filled-select-currency"
+          select
+          label="Select"
+          defaultValue={postPerPage}
+          helperText="Books"
+          variant="filled"
+          onChange={handlePostPerPage}
+        >
+          {postPerPageA.map((option) => (
+            <MenuItem key={option.value} value={option.value}>
+              {option.label}
+            </MenuItem>
+          ))}
+        </TextField>
+        <Pagination
+          postPerPage={postPerPage}
+          totalPosts={user.length}
+          paginate={paginate}
+          currentPage={page}
+        />
+      </div>
       <div className="container" style={{ marginBottom: 20 }}>
         <div className="row">
           <div className="col-1">First name</div>
@@ -122,48 +166,44 @@ function GetUser() {
         </div>
       </div>
       <ThemeProvider theme={theme}>
-        {currentPosts
-          .filter(
-            (user) =>
-              user.firstname.toLowerCase().includes(search) ||
-              user.lastname.toLowerCase().includes(search) ||
-              user.email.toLowerCase().includes(search)
-          )
-          .map((item) => (
-            <div key={item.id} className="container">
-              <div className="row">
-                <span className="col-1" style={{ paddingTop: 15 }}>
-                  {item.firstname}
-                </span>
-                <span className="col-1" style={{ paddingTop: 15 }}>
-                  {item.lastname}
-                </span>
-                <span className="col-4" style={{ paddingTop: 15 }}>
-                  {item.email}
-                </span>
-                <span className="col-1" style={{ paddingTop: 15 }}>
-                  {item.role}
-                </span>
-                <span className="col-4">
-                  <Button
-                    type="submit"
-                    variant="contained"
-                    style={{ margin: 10 }}
-                  >
-                    update
-                  </Button>
-                  <Button
-                    variant="contained"
-                    style={{ margin: 10 }}
-                    onClick={() => onDelete(item.id)}
-                  >
-                    delete
-                  </Button>
-                </span>
-                <hr></hr>
-              </div>
+        {currentPosts.map((item) => (
+          <div key={item.id} className="container">
+            <div className="row">
+              <span className="col-1" style={{ paddingTop: 15 }}>
+                {item.firstname}
+              </span>
+              <span className="col-1" style={{ paddingTop: 15 }}>
+                {item.lastname}
+              </span>
+              <span className="col-4" style={{ paddingTop: 15 }}>
+                {item.email}
+              </span>
+              <span className="col-1" style={{ paddingTop: 15 }}>
+                {item.role}
+              </span>
+              <span className="col-4">
+                <Button
+                  type="submit"
+                  variant="contained"
+                  style={{ margin: 10 }}
+                  onClick={() => {
+                    navigate("/updateProfile/" + item.id);
+                  }}
+                >
+                  update
+                </Button>
+                <Button
+                  variant="contained"
+                  style={{ margin: 10 }}
+                  onClick={() => onDelete(item.id)}
+                >
+                  delete
+                </Button>
+              </span>
+              <hr></hr>
             </div>
-          ))}
+          </div>
+        ))}
       </ThemeProvider>
       <ToastContainer />
     </div>
