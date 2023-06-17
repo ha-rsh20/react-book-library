@@ -24,10 +24,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { Col, Row } from "react-bootstrap";
 import MenuItem from "@mui/material/MenuItem";
 
-function GetBook() {
+function GetBook(props) {
   const [books, setBooks] = useState([]);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+  let [cartId, setCartId] = useState();
 
   let userSId = useSelector((state) => state.users.id);
   let userRole = useSelector((state) => state.users.role);
@@ -74,7 +75,7 @@ function GetBook() {
       .delete("http://localhost:4000/app/deleteBook/" + id)
       .then((res) => {
         if (res.status === 200) {
-          toast.success("Book deleted successfully!", {
+          toast.success("Book removed successfully!", {
             position: "top-right",
             autoClose: 3000,
             hideProgressBar: false,
@@ -89,7 +90,7 @@ function GetBook() {
         }
       })
       .catch((err) => {
-        toast.error("Error in deleting book!", {
+        toast.error("Error in removing book!", {
           position: "top-right",
           autoClose: 3000,
           hideProgressBar: false,
@@ -125,25 +126,15 @@ function GetBook() {
     }
     axios
       .get(
-        userRole === "Admin"
+        userRole === "Admin" || props.path === "Home"
           ? "http://localhost:4000/app/showAllBooks"
           : "http://localhost:4000/app/showBooksBySeller/" + userSId
       )
       .then((res) => {
         setBooks(res.data);
-        toast.success("Success on fetching books details!", {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "dark",
-        });
       })
       .catch((err) => {
-        toast.error("Error in fetching books details!", {
+        toast.error("Error in fetching book details!", {
           position: "top-right",
           autoClose: 3000,
           hideProgressBar: false,
@@ -155,6 +146,64 @@ function GetBook() {
         });
       });
   }, []);
+
+  const toCart = async (uid, bid, book) => {
+    if (userSId !== undefined) {
+      await axios
+        .get("http://localhost:4000/app/getCartId")
+        .then((res) => {
+          cartId = res.data.cid;
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+
+      let cartBook = {
+        name: book.name,
+        description: book.description,
+        page: book.page,
+        price: book.price,
+        cid: cartId + 1,
+      };
+
+      axios
+        .post(
+          "http://localhost:4000/app/addToCart/" + uid + "/" + bid,
+          cartBook
+        )
+        .then((res) => {
+          toast.success("Book added to cart!", {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "dark",
+          });
+        })
+        .catch((err) => {
+          toast.error(
+            uid === ""
+              ? "Login to add book to cart"
+              : "Error in adding Book to Cart!",
+            {
+              position: "top-right",
+              autoClose: 3000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+              theme: "dark",
+            }
+          );
+        });
+    } else {
+      navigate("/login");
+    }
+  };
 
   return (
     <div style={{ padding: 20 }}>
@@ -212,28 +261,44 @@ function GetBook() {
                   </div>
                 </Card.Body>
                 <ListGroup className="list-group-flush">
-                  <ListGroup.Item>${item.price}</ListGroup.Item>
+                  <ListGroup.Item>Price: ${item.price}</ListGroup.Item>
                 </ListGroup>
                 <ListGroup className="list-group-flush">
                   <ListGroup.Item>Pages: {item.page}</ListGroup.Item>
                 </ListGroup>
-                <Card.Body>
-                  <Button
-                    type="submit"
-                    variant="contained"
-                    style={{ margin: 10 }}
-                    onClick={() => toUpdate(item)}
+
+                {props.path === "Home" ? (
+                  <Card.Body
+                    style={{ display: "flex", justifyContent: "center" }}
                   >
-                    update
-                  </Button>
-                  <Button
-                    variant="contained"
-                    style={{ margin: 10 }}
-                    onClick={() => onDelete(item.id)}
+                    <Button
+                      variant="contained"
+                      onClick={() => toCart(userSId, item.id, item)}
+                    >
+                      To cart
+                    </Button>
+                  </Card.Body>
+                ) : (
+                  <Card.Body
+                    style={{ display: "flex", justifyContent: "center" }}
                   >
-                    delete
-                  </Button>
-                </Card.Body>
+                    <Button
+                      type="submit"
+                      variant="contained"
+                      style={{ margin: 10 }}
+                      onClick={() => toUpdate(item)}
+                    >
+                      update
+                    </Button>
+                    <Button
+                      variant="contained"
+                      style={{ margin: 10 }}
+                      onClick={() => onDelete(item.id)}
+                    >
+                      delete
+                    </Button>
+                  </Card.Body>
+                )}
               </Card>
             </Col>
           ))}

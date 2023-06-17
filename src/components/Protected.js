@@ -3,17 +3,11 @@ import Login from "./Login";
 
 function Protected(props) {
   const { Component } = props;
-  const [log, setLog] = useState();
-
+  let login = localStorage.getItem("loggedIn");
   useEffect(() => {
-    let login = localStorage.getItem("loggedIn");
-    if (login === "false") {
-      setLog("false");
-    } else {
-      setLog("true");
-    }
+    login = localStorage.getItem("loggedIn");
   });
-  return <div>{log === "false" ? <Login /> : <Component />}</div>;
+  return <div>{login === "false" ? <Login /> : <Component />}</div>;
 }
 
 export default Protected;

@@ -27,8 +27,14 @@ function UpdateBook() {
   };
 
   const validationSchema = Yup.object().shape({
-    name: Yup.string().min(3, "Enter more than 3 characters"),
-    email: Yup.string().email("Enter valid email address"),
+    name: Yup.string()
+      .required("Please type title of the book")
+      .min(3, "Enter more than 3 characters"),
+    price: Yup.number().required("Please enter price for the book"),
+    description: Yup.string()
+      .required("Please type description of the book")
+      .min(20, "Enter more than 20 characters"),
+    pages: Yup.number().required("Please enter no of pages of the book"),
   });
 
   const handleCoverUpload = (event) => {
@@ -61,7 +67,7 @@ function UpdateBook() {
             progress: undefined,
             theme: "dark",
           });
-          navigate("/getBooks");
+          setTimeout(() => navigate("/getBooks"), 1000);
         }
       })
       .catch((err) => {
@@ -143,7 +149,7 @@ function UpdateBook() {
                   onBlur={formik.handleBlur}
                   required
                 />
-                {formik.touched.email && (
+                {formik.touched.price && (
                   <span
                     style={{
                       padding: 5,
@@ -152,7 +158,7 @@ function UpdateBook() {
                       fontWeight: 500,
                     }}
                   >
-                    {formik.errors.email}
+                    {formik.errors.price}
                   </span>
                 )}
               </div>
@@ -174,7 +180,7 @@ function UpdateBook() {
                   onBlur={formik.handleBlur}
                   required
                 />
-                {formik.touched.email && (
+                {formik.touched.description && (
                   <span
                     style={{
                       padding: 5,
@@ -183,7 +189,7 @@ function UpdateBook() {
                       fontWeight: 500,
                     }}
                   >
-                    {formik.errors.email}
+                    {formik.errors.description}
                   </span>
                 )}
               </div>
@@ -205,7 +211,7 @@ function UpdateBook() {
                   onBlur={formik.handleBlur}
                   required
                 />
-                {formik.touched.email && (
+                {formik.touched.pages && (
                   <span
                     style={{
                       padding: 5,
@@ -214,11 +220,30 @@ function UpdateBook() {
                       fontWeight: 500,
                     }}
                   >
-                    {formik.errors.email}
+                    {formik.errors.pages}
                   </span>
                 )}
               </div>
-              <input type="file" name="cover" onChange={handleCoverUpload} />
+              <div
+                style={{
+                  padding: 10,
+                  display: "flex",
+                  flexDirection: "column",
+                }}
+              >
+                <TextField
+                  type="file"
+                  variant="outlined"
+                  label="Cover page"
+                  name="cover"
+                  placeholder="enter cover page"
+                  onChange={handleCoverUpload}
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                  required
+                />
+              </div>
               <Button type="submit" variant="contained" style={{ margin: 10 }}>
                 Update book
               </Button>

@@ -158,7 +158,7 @@ export default function Cart() {
           toast.success(
             isPlaced
               ? "Book Placed successfully!"
-              : "Book deleted successfully!",
+              : "Book removed successfully!",
             {
               position: "top-right",
               autoClose: 3000,
@@ -176,7 +176,7 @@ export default function Cart() {
       })
       .catch((err) => {
         toast.error(
-          isPlaced ? "Error in placing book!" : "Error in deleting book!",
+          isPlaced ? "Error in placing book!" : "Error in removing book!",
           {
             position: "top-right",
             autoClose: 3000,
@@ -233,7 +233,7 @@ export default function Cart() {
               <div className="col-2">Name</div>
               <div className="col-1">Price</div>
               <div className="col-1">Pages</div>
-              <div className="col-3">Quantity</div>
+              <div className="col-2">Quantity</div>
             </div>
           </div>
           {currentPosts.map((item) => (
@@ -248,7 +248,14 @@ export default function Cart() {
                 <span className="col-1" style={{ paddingTop: 15 }}>
                   {item.page}
                 </span>
-                <span className="col-2" style={{ paddingTop: 15 }}>
+                <span
+                  className="col-2"
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
                   <Button
                     onClick={() => {
                       incrementQuantity(item.cid, item);
