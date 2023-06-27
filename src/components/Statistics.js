@@ -19,7 +19,7 @@ function Statistics() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:4000/app/showBook/" + bid)
+      .get("https://book-service-ngjz.onrender.com/app/showBook/" + bid)
       .then((res) => {
         book = res.data;
         console.log(book);
