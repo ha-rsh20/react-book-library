@@ -71,7 +71,7 @@ function Register() {
       dispatch(updateUserRole(localStorage.getItem("role")));
     }
     axios
-      .get("http://localhost:4000/app/showAllUsers")
+      .get("https://book-service-ngjz.onrender.com/app/showAllUsers")
       .then((res) => {
         setUser(res.data);
       })
