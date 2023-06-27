@@ -39,11 +39,11 @@ function GetBook(props) {
   let [currentPosts, setCurrentPosts] = useState();
   const navigate = useNavigate();
   currentPosts = books
-    // .filter(
-    //   (book) =>
-    //     book.name.toLowerCase().includes(search) ||
-    //     book.description.toLowerCase().includes(search)
-    // )
+    .filter(
+      (book) =>
+        book.name.toLowerCase().includes(search) ||
+        book.description.toLowerCase().includes(search)
+    )
     .slice(indexOfFirstPost, indexOfLastPost);
 
   const postPerPageA = [
