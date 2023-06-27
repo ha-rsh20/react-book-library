@@ -35,11 +35,11 @@ export default function Cart() {
   const indexOfFirstPost = indexOfLastPost - postPerPage;
   let [currentPosts, setCurrentPosts] = useState([]);
   currentPosts = cartBook
-    // .filter(
-    //   (cartBooks) =>
-    //     cartBooks.name.toLowerCase().includes(search) ||
-    //     cartBooks.description.toLowerCase().includes(search)
-    // )
+    .filter(
+      (cartBooks) =>
+        cartBooks.name.toLowerCase().includes(search) ||
+        cartBooks.description.toLowerCase().includes(search)
+    )
     .slice(indexOfFirstPost, indexOfLastPost);
 
   const postPerPageA = [
