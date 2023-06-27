@@ -53,7 +53,7 @@ function GetUser() {
 
   const onDelete = (id) => {
     axios
-      .delete("http://localhost:4000/app/deleteUser/" + id)
+      .delete("https://book-service-ngjz.onrender.com/app/deleteUser/" + id)
       .then((res) => {
         if (res.status === 200) {
           toast.success("User deleted successfully!", {
@@ -86,7 +86,7 @@ function GetUser() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:4000/app/showAllUsers")
+      .get("https://book-service-ngjz.onrender.com/app/showAllUsers")
       .then((res) => {
         setUser(res.data);
         toast.success("Success on fetching user details!", {
