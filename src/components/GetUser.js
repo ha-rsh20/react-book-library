@@ -114,7 +114,7 @@ function GetUser() {
       });
   }, []);
   return (
-    <div style={{ padding: 20 }}>
+    <div className="App" style={{ padding: 20 }}>
       <div
         style={{
           display: "flex",
@@ -133,29 +133,7 @@ function GetUser() {
           />
         </div>
       </div>
-      <div style={{ margin: 10, display: "flex", justifyContent: "center" }}>
-        <TextField
-          id="filled-select-currency"
-          select
-          label="Select"
-          defaultValue={postPerPage}
-          helperText="Books"
-          variant="filled"
-          onChange={handlePostPerPage}
-        >
-          {postPerPageA.map((option) => (
-            <MenuItem key={option.value} value={option.value}>
-              {option.label}
-            </MenuItem>
-          ))}
-        </TextField>
-        <Pagination
-          postPerPage={postPerPage}
-          totalPosts={user.length}
-          paginate={paginate}
-          currentPage={page}
-        />
-      </div>
+
       <div className="container" style={{ marginBottom: 20 }}>
         <div className="row">
           <div className="col-1">First name</div>
@@ -204,6 +182,36 @@ function GetUser() {
             </div>
           </div>
         ))}
+        <div
+          style={{
+            margin: 10,
+            marginBottom: 70,
+            display: "flex",
+            justifyContent: "center",
+          }}
+        >
+          {/* <TextField
+            id="filled-select-currency"
+            select
+            label="Select"
+            defaultValue={postPerPage}
+            helperText="Books"
+            variant="filled"
+            onChange={handlePostPerPage}
+          >
+            {postPerPageA.map((option) => (
+              <MenuItem key={option.value} value={option.value}>
+                {option.label}
+              </MenuItem>
+            ))}
+          </TextField> */}
+          <Pagination
+            postPerPage={postPerPage}
+            totalPosts={user.length}
+            paginate={paginate}
+            currentPage={page}
+          />
+        </div>
       </ThemeProvider>
       <ToastContainer />
     </div>

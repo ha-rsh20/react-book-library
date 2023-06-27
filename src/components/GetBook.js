@@ -22,7 +22,6 @@ import {
 } from "../state/slice/userSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { Col, Row } from "react-bootstrap";
-import MenuItem from "@mui/material/MenuItem";
 
 function GetBook(props) {
   const [books, setBooks] = useState([]);
@@ -206,7 +205,7 @@ function GetBook(props) {
   };
 
   return (
-    <div style={{ padding: 20 }}>
+    <div className="App" style={{ padding: 20 }}>
       <div
         style={{
           display: "flex",
@@ -225,29 +224,7 @@ function GetBook(props) {
           />
         </div>
       </div>
-      <div style={{ margin: 10, display: "flex", justifyContent: "center" }}>
-        <TextField
-          id="filled-select-currency"
-          select
-          label="Select"
-          defaultValue={postPerPage}
-          helperText="Books"
-          variant="filled"
-          onChange={handlePostPerPage}
-        >
-          {postPerPageA.map((option) => (
-            <MenuItem key={option.value} value={option.value}>
-              {option.label}
-            </MenuItem>
-          ))}
-        </TextField>
-        <Pagination
-          postPerPage={postPerPage}
-          totalPosts={books.length}
-          paginate={paginate}
-          currentPage={page}
-        />
-      </div>
+
       <ThemeProvider theme={theme}>
         <Row style={{ margin: 30 }}>
           {currentPosts.map((item) => (
@@ -261,11 +238,20 @@ function GetBook(props) {
                   </div>
                 </Card.Body>
                 <ListGroup className="list-group-flush">
-                  <ListGroup.Item>Price: ${item.price}</ListGroup.Item>
+                  <ListGroup.Item>Price: ₹ {item.price}</ListGroup.Item>
                 </ListGroup>
                 <ListGroup className="list-group-flush">
                   <ListGroup.Item>Pages: {item.page}</ListGroup.Item>
                 </ListGroup>
+                {props.path === "Home" || userRole === "Admin" ? (
+                  <ListGroup className="list-group-flush">
+                    <ListGroup.Item>Seller: {item.sname}</ListGroup.Item>
+                  </ListGroup>
+                ) : (
+                  <ListGroup className="list-group-flush">
+                    <ListGroup.Item>Selling: {item.selling}</ListGroup.Item>
+                  </ListGroup>
+                )}
 
                 {props.path === "Home" ? (
                   <Card.Body
@@ -279,30 +265,74 @@ function GetBook(props) {
                     </Button>
                   </Card.Body>
                 ) : (
-                  <Card.Body
-                    style={{ display: "flex", justifyContent: "center" }}
-                  >
-                    <Button
-                      type="submit"
-                      variant="contained"
-                      style={{ margin: 10 }}
-                      onClick={() => toUpdate(item)}
+                  <div>
+                    <Card.Body
+                      style={{ display: "flex", justifyContent: "center" }}
                     >
-                      update
-                    </Button>
-                    <Button
-                      variant="contained"
-                      style={{ margin: 10 }}
-                      onClick={() => onDelete(item.id)}
-                    >
-                      delete
-                    </Button>
-                  </Card.Body>
+                      <Button
+                        type="submit"
+                        variant="contained"
+                        style={{ margin: 10, marginBottom: 0 }}
+                        onClick={() => toUpdate(item)}
+                      >
+                        update
+                      </Button>
+                      <Button
+                        variant="contained"
+                        style={{ margin: 10, marginBottom: 0 }}
+                        onClick={() => onDelete(item.id)}
+                      >
+                        delete
+                      </Button>
+                    </Card.Body>
+                    {userRole != "Admin" ? (
+                      <Card.Body>
+                        <Button
+                          variant="contained"
+                          onClick={() => navigate("/statistics/" + item.id)}
+                        >
+                          Statistics
+                        </Button>
+                      </Card.Body>
+                    ) : (
+                      <div />
+                    )}
+                  </div>
                 )}
               </Card>
             </Col>
           ))}
         </Row>
+        <div
+          style={{
+            margin: 10,
+            marginBottom: 70,
+            display: "flex",
+            justifyContent: "center",
+          }}
+        >
+          {/* <TextField
+            id="filled-select-currency"
+            select
+            label="Select"
+            defaultValue={postPerPage}
+            helperText="Books"
+            variant="filled"
+            onChange={handlePostPerPage}
+          >
+            {postPerPageA.map((option) => (
+              <MenuItem key={option.value} value={option.value}>
+                {option.label}
+              </MenuItem>
+            ))}
+          </TextField> */}
+          <Pagination
+            postPerPage={postPerPage}
+            totalPosts={books.length}
+            paginate={paginate}
+            currentPage={page}
+          />
+        </div>
       </ThemeProvider>
       <ToastContainer />
     </div>

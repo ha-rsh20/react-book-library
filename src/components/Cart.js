@@ -22,9 +22,12 @@ import MenuItem from "@mui/material/MenuItem";
 
 export default function Cart() {
   const [cartBook, setCartBook] = useState([]);
-  const [quantity, setQuantity] = useState();
+  const [quantity, setQuantity] = useState(0);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+  const [books, setBooks] = useState();
+  const [bookSell, setBookSell] = useState();
+  let [total, setTotal] = useState(0);
   let temp;
   let id;
   const [postPerPage, setPostPerPage] = useState("5");
@@ -71,6 +74,7 @@ export default function Cart() {
   const cartBookPage = useSelector((state) => state.cart.page);
   const cartBookQuantity = useSelector((state) => state.cart.quantity);
   const userSId = useSelector((state) => state.users.id);
+  const userFName = useSelector((state) => state.users.firstname);
 
   const setup = (bid, uid, name, price, description, page, quantity) => {
     dispatch(updateCartBookId(bid));
@@ -83,6 +87,7 @@ export default function Cart() {
   };
 
   useEffect(() => {
+    total = 0;
     if (localStorage.getItem("firstname")) {
       dispatch(updateUserFirstName(localStorage.getItem("firstname")));
     }
@@ -90,6 +95,14 @@ export default function Cart() {
       id = localStorage.getItem("id");
       dispatch(updateUserId(id));
     }
+    axios
+      .get("http://localhost:4000/app/showAllBooks")
+      .then((res) => {
+        setBooks(res.data);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
     axios
       .get("http://localhost:4000/app/showCart/" + id)
       .then((res) => {
@@ -103,11 +116,17 @@ export default function Cart() {
           res.data.page,
           res.data.quantity
         );
+        let n = res.data.length;
+        for (let i = 0; i < n; i++) {
+          total = total + res.data[i].quantity * res.data[i].price;
+          setTotal(total);
+        }
+        // res.data.map((book) => setTotal(total + book.quantity * book.price));
       })
       .catch((err) => {
         console.log(err);
       });
-  }, []);
+  }, [quantity]);
 
   const incrementQuantity = (cid, item) => {
     temp = cartBook.filter((book) => book.cid === cid)[0].quantity;
@@ -116,7 +135,8 @@ export default function Cart() {
       return cartBook;
     });
     onSave(item);
-    setQuantity(cartBook.filter((book) => book.cid === cid)[0].quantity);
+    // setTotal(total + item.quantity * item.price);
+    setQuantity(quantity + 1);
   };
 
   const decrementQuantity = (cid, item) => {
@@ -127,8 +147,9 @@ export default function Cart() {
         return cartBook;
       });
       onSave(item);
+      // setTotal(total - item.quantity * item.price);
     }
-    setQuantity(cartBook.filter((book) => book.cid === cid)[0].quantity);
+    setQuantity(quantity + 1);
   };
 
   const onSave = (item) => {
@@ -150,7 +171,12 @@ export default function Cart() {
       });
   };
 
-  const onDelete = (bid, isPlaced) => {
+  const onDelete = (bid, isPlaced, cid, quantity) => {
+    console.log(quantity);
+    let arr = {
+      buyer: userFName.toString(),
+      quantity: quantity.toString(),
+    };
     axios
       .delete("http://localhost:4000/app/deleteCart/" + userSId + "/" + bid)
       .then((res) => {
@@ -170,7 +196,20 @@ export default function Cart() {
               theme: "dark",
             }
           );
-
+          isPlaced
+            ? axios
+                .put(
+                  "http://localhost:4000/app/bookSell/" + bid + "/" + cid,
+                  arr
+                )
+                .then((res) => {
+                  console.log("Book " + bid + " selled");
+                })
+                .catch((err) => {
+                  console.log(err);
+                })
+            : console.log("Not call of placing book");
+          setQuantity(quantity + 1);
           setCartBook(cartBook.filter((book) => book.bookid !== bid));
         }
       })
@@ -199,34 +238,11 @@ export default function Cart() {
           label="Search"
           variant="filled"
           value={search}
-          style={{ marginTop: 10 }}
+          style={{ marginTop: 20 }}
           onChange={(e) => {
             setSearch(e.target.value);
           }}
         />
-        <div style={{ margin: 10, display: "flex", justifyContent: "center" }}>
-          <TextField
-            id="filled-select-currency"
-            select
-            label="Select"
-            defaultValue={postPerPage}
-            helperText="Books"
-            variant="filled"
-            onChange={handlePostPerPage}
-          >
-            {postPerPageA.map((option) => (
-              <MenuItem key={option.value} value={option.value}>
-                {option.label}
-              </MenuItem>
-            ))}
-          </TextField>
-          <Pagination
-            postPerPage={postPerPage}
-            totalPosts={cartBook.length}
-            paginate={paginate}
-            currentPage={page}
-          />
-        </div>
         <div style={{ padding: 20 }}>
           <div className="container" style={{ marginBottom: 20 }}>
             <div className="row">
@@ -243,7 +259,7 @@ export default function Cart() {
                   {item.name}
                 </span>
                 <span className="col-1" style={{ paddingTop: 15 }}>
-                  ${item.price}
+                  ₹ {item.price}
                 </span>
                 <span className="col-1" style={{ paddingTop: 15 }}>
                   {item.page}
@@ -277,7 +293,7 @@ export default function Cart() {
                     variant="contained"
                     style={{ margin: 10 }}
                     onClick={() => {
-                      onDelete(item.bookid, false);
+                      onDelete(item.bookid, false, item.cid, item.quantity);
                     }}
                   >
                     delete
@@ -286,7 +302,7 @@ export default function Cart() {
                     variant="contained"
                     style={{ margin: 10 }}
                     onClick={() => {
-                      onDelete(item.bookid, true);
+                      onDelete(item.bookid, true, item.cid, item.quantity);
                     }}
                   >
                     Place order
@@ -296,6 +312,41 @@ export default function Cart() {
               </div>
             </div>
           ))}
+        </div>
+        <div className="container">
+          <div className="row">
+            <span className="col-2">Total: ₹ {total.toFixed(2)}</span>
+          </div>
+        </div>
+        <div
+          style={{
+            margin: 10,
+            marginBottom: 70,
+            display: "flex",
+            justifyContent: "center",
+          }}
+        >
+          {/* <TextField
+            id="filled-select-currency"
+            select
+            label="Select"
+            defaultValue={postPerPage}
+            helperText="Books"
+            variant="filled"
+            onChange={handlePostPerPage}
+          >
+            {postPerPageA.map((option) => (
+              <MenuItem key={option.value} value={option.value}>
+                {option.label}
+              </MenuItem>
+            ))}
+          </TextField> */}
+          <Pagination
+            postPerPage={postPerPage}
+            totalPosts={cartBook.length}
+            paginate={paginate}
+            currentPage={page}
+          />
         </div>
         <ToastContainer />
       </ThemeProvider>

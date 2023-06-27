@@ -14,6 +14,7 @@ import UpdateProfile from "./components/UpdateProfile";
 import { Provider } from "react-redux";
 import { store } from "./state/store";
 import UpdateBook from "./components/UpdateBook";
+import Statistics from "./components/Statistics";
 
 function App() {
   return (
@@ -49,6 +50,10 @@ function App() {
             <Route
               path="/updateProfile/:id"
               element={<Protected Component={UpdateProfile} />}
+            />
+            <Route
+              path="/statistics/:bid"
+              element={<Protected Component={Statistics} />}
             />
             <Route path="*" element={<NotFound />} />
           </Routes>

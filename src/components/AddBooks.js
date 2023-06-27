@@ -18,6 +18,7 @@ export default function AddBooks() {
     description: "",
     pages: "",
     cover: "",
+    sname: "",
   };
 
   const [base64Image, setBase64Image] = useState("");
@@ -57,8 +58,15 @@ export default function AddBooks() {
 
   const onFormSubmit = (values, { resetForm }) => {
     values.id = book[book.length - 1].id + 1;
+
     if (localStorage.getItem("id")) {
       values.sid = localStorage.getItem("id");
+    }
+    if (localStorage.getItem("firstname") && localStorage.getItem("lastname")) {
+      values.sname =
+        localStorage.getItem("firstname") +
+        " " +
+        localStorage.getItem("lastname");
     }
     values.cover = base64Image;
     axios
