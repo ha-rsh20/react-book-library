@@ -41,7 +41,7 @@ function AddUser() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:4000/app/showAllUsers")
+      .get("https://book-service-ngjz.onrender.com/app/showAllUsers")
       .then((res) => {
         setUser(res.data);
       })
@@ -51,7 +51,7 @@ function AddUser() {
   const onFormSubmit = (values, { resetForm }) => {
     values.id = user[user.length - 1].id + 1;
     axios
-      .post("http://localhost:4000/app/addUser", values)
+      .post("https://book-service-ngjz.onrender.com/app/addUser", values)
       .then((res) => {
         if (res.status === 201) {
           toast.success("User added!", {
