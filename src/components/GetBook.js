@@ -39,11 +39,11 @@ function GetBook(props) {
   let [currentPosts, setCurrentPosts] = useState();
   const navigate = useNavigate();
   currentPosts = books
-    .filter(
-      (book) =>
-        book.name.toLowerCase().includes(search) ||
-        book.description.toLowerCase().includes(search)
-    )
+    // .filter(
+    //   (book) =>
+    //     book.name.toLowerCase().includes(search) ||
+    //     book.description.toLowerCase().includes(search)
+    // )
     .slice(indexOfFirstPost, indexOfLastPost);
 
   const postPerPageA = [
@@ -71,7 +71,7 @@ function GetBook(props) {
 
   const onDelete = (id) => {
     axios
-      .delete("http://localhost:4000/app/deleteBook/" + id)
+      .delete("https://book-service-ngjz.onrender.com/app/deleteBook/" + id)
       .then((res) => {
         if (res.status === 200) {
           toast.success("Book removed successfully!", {
@@ -126,8 +126,9 @@ function GetBook(props) {
     axios
       .get(
         userRole === "Admin" || props.path === "Home"
-          ? "http://localhost:4000/app/showAllBooks"
-          : "http://localhost:4000/app/showBooksBySeller/" + userSId
+          ? "https://book-service-ngjz.onrender.com/app/showAllBooks"
+          : "hhttps://book-service-ngjz.onrender.com/app/showBooksBySeller/" +
+              userSId
       )
       .then((res) => {
         setBooks(res.data);
@@ -149,7 +150,7 @@ function GetBook(props) {
   const toCart = async (uid, bid, book) => {
     if (userSId !== undefined) {
       await axios
-        .get("http://localhost:4000/app/getCartId")
+        .get("https://book-service-ngjz.onrender.com/app/getCartId")
         .then((res) => {
           cartId = res.data.cid;
         })
@@ -167,7 +168,10 @@ function GetBook(props) {
 
       axios
         .post(
-          "http://localhost:4000/app/addToCart/" + uid + "/" + bid,
+          "https://book-service-ngjz.onrender.com/app/addToCart/" +
+            uid +
+            "/" +
+            bid,
           cartBook
         )
         .then((res) => {
