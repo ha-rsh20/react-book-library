@@ -35,11 +35,11 @@ export default function Cart() {
   const indexOfFirstPost = indexOfLastPost - postPerPage;
   let [currentPosts, setCurrentPosts] = useState([]);
   currentPosts = cartBook
-    .filter(
-      (cartBooks) =>
-        cartBooks.name.toLowerCase().includes(search) ||
-        cartBooks.description.toLowerCase().includes(search)
-    )
+    // .filter(
+    //   (cartBooks) =>
+    //     cartBooks.name.toLowerCase().includes(search) ||
+    //     cartBooks.description.toLowerCase().includes(search)
+    // )
     .slice(indexOfFirstPost, indexOfLastPost);
 
   const postPerPageA = [
@@ -96,7 +96,7 @@ export default function Cart() {
       dispatch(updateUserId(id));
     }
     axios
-      .get("http://localhost:4000/app/showAllBooks")
+      .get("https://book-service-ngjz.onrender.com/app/showAllBooks")
       .then((res) => {
         setBooks(res.data);
       })
@@ -104,7 +104,7 @@ export default function Cart() {
         console.log(err);
       });
     axios
-      .get("http://localhost:4000/app/showCart/" + id)
+      .get("https://book-service-ngjz.onrender.com/app/showCart/" + id)
       .then((res) => {
         setCartBook(res.data);
         setup(
@@ -154,7 +154,11 @@ export default function Cart() {
 
   const onSave = (item) => {
     axios
-      .put("http://localhost:4000/app/updateCartQuantity/" + item.cid, item)
+      .put(
+        "https://book-service-ngjz.onrender.com/app/updateCartQuantity/" +
+          item.cid,
+        item
+      )
       .then((res) => {})
       .catch((err) => {
         toast.error("Book updated!", {
@@ -178,7 +182,12 @@ export default function Cart() {
       quantity: quantity.toString(),
     };
     axios
-      .delete("http://localhost:4000/app/deleteCart/" + userSId + "/" + bid)
+      .delete(
+        "https://book-service-ngjz.onrender.com/app/deleteCart/" +
+          userSId +
+          "/" +
+          bid
+      )
       .then((res) => {
         if (res.status === 200) {
           toast.success(
@@ -199,7 +208,10 @@ export default function Cart() {
           isPlaced
             ? axios
                 .put(
-                  "http://localhost:4000/app/bookSell/" + bid + "/" + cid,
+                  "https://book-service-ngjz.onrender.com/app/bookSell/" +
+                    bid +
+                    "/" +
+                    cid,
                   arr
                 )
                 .then((res) => {
