@@ -35,7 +35,7 @@ export default function AddBooks() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:4000/app/showAllBooks")
+      .get("https://book-service-ngjz.onrender.com/app/showAllBooks")
       .then((res) => {
         setBook(res.data);
       })
@@ -70,7 +70,7 @@ export default function AddBooks() {
     }
     values.cover = base64Image;
     axios
-      .post("http://localhost:4000/app/addBook", values)
+      .post("https://book-service-ngjz.onrender.com/app/addBook", values)
       .then((res) => {
         if (res.status === 201) {
           toast.success("Book added!", {
