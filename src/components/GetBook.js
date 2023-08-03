@@ -22,6 +22,7 @@ import {
 } from "../state/slice/userSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { Col, Row } from "react-bootstrap";
+import "./MyStyle.css";
 
 function GetBook(props) {
   const [books, setBooks] = useState([]);
@@ -233,7 +234,7 @@ function GetBook(props) {
         <Row style={{ margin: 30 }}>
           {currentPosts.map((item) => (
             <Col key={item.id} style={{ margin: 20 }}>
-              <Card style={{ width: "18rem" }}>
+              <Card className="mycard">
                 <Card.Img variant="top" src={item.cover} loading="lazy" />
                 <Card.Body>
                   <Card.Title>{item.name}</Card.Title>
