@@ -85,9 +85,7 @@ function NavBar() {
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto">
-            <Nav.Link as={Link} to="/">
-              Home
-            </Nav.Link>
+            <Nav.Link href="/">Home</Nav.Link>
             <Nav.Link as={Link} to="/cart">
               Cart
             </Nav.Link>
@@ -127,44 +125,35 @@ function NavBar() {
               <div />
             )}
           </Nav>
+          <Nav className="d-flex">
+            {log === "false" || log === undefined ? (
+              <Nav.Link as={Link} to="/register">
+                Register
+              </Nav.Link>
+            ) : (
+              <Nav
+                onClick={handleClick}
+                style={{
+                  cursor: "pointer",
+                }}
+              >
+                <Avatar sx={{ bgcolor: "#ffffff", color: "#202020" }}>
+                  {userFName[0].toUpperCase()}
+                  {userLName[0].toUpperCase()}
+                </Avatar>
+              </Nav>
+            )}
+            {log === "false" || log === undefined ? (
+              <Nav.Link as={Link} to="/login">
+                Login
+              </Nav.Link>
+            ) : (
+              <div />
+            )}
+          </Nav>
         </Navbar.Collapse>
       </Container>
-      <div
-        style={{
-          float: "right",
-        }}
-      >
-        <Container>
-          <Navbar.Collapse>
-            <Nav className="me-auto">
-              {log === "false" ? (
-                <Nav.Link as={Link} to="/register">
-                  Register
-                </Nav.Link>
-              ) : (
-                <Nav
-                  onClick={handleClick}
-                  style={{
-                    cursor: "pointer",
-                  }}
-                >
-                  <Avatar sx={{ bgcolor: "#ffffff", color: "#202020" }}>
-                    {userFName[0].toUpperCase()}
-                    {userLName[0].toUpperCase()}
-                  </Avatar>
-                </Nav>
-              )}
-              {log === "false" ? (
-                <Nav.Link as={Link} to="/login">
-                  Login
-                </Nav.Link>
-              ) : (
-                <div />
-              )}
-            </Nav>
-          </Navbar.Collapse>
-        </Container>
-      </div>
+
       <Popover
         open={open}
         anchorOrigin={{

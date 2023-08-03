@@ -22,12 +22,14 @@ import {
 } from "../state/slice/userSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { Col, Row } from "react-bootstrap";
+import "./MyStyle.css";
 
 function GetBook(props) {
   const [books, setBooks] = useState([]);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   let [cartId, setCartId] = useState();
+  let tmp;
 
   let userSId = useSelector((state) => state.users.id);
   let userRole = useSelector((state) => state.users.role);
@@ -67,6 +69,13 @@ function GetBook(props) {
 
   const paginate = (pageNumber) => {
     setPage(pageNumber);
+  };
+
+  const handleSearch = (e) => {
+    tmp = parseInt(e.target.value);
+
+    console.log(tmp);
+    setSearch(e.target.value);
   };
 
   const onDelete = (id) => {
@@ -218,9 +227,7 @@ function GetBook(props) {
             label="Search"
             variant="filled"
             value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-            }}
+            onChange={(e) => handleSearch(e)}
           />
         </div>
       </div>
@@ -229,12 +236,17 @@ function GetBook(props) {
         <Row style={{ margin: 30 }}>
           {currentPosts.map((item) => (
             <Col key={item.id} style={{ margin: 20 }}>
-              <Card style={{ width: "18rem" }}>
+              <Card className="mycard">
                 <Card.Img variant="top" src={item.cover} loading="lazy" />
                 <Card.Body>
                   <Card.Title>{item.name}</Card.Title>
-                  <div style={{ height: "10rem", overflow: "hidden" }}>
-                    <Card.Text>{item.description}</Card.Text>
+                  <div style={{ height: "10rem" }}>
+                    <Card.Text
+                      className="card-text"
+                      style={{ overflow: "hidden" }}
+                    >
+                      {item.description}
+                    </Card.Text>
                   </div>
                 </Card.Body>
                 <ListGroup className="list-group-flush">
