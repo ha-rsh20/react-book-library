@@ -128,7 +128,7 @@ function GetBook(props) {
       .get(
         userRole === "Admin" || props.path === "Home"
           ? "https://book-service-ngjz.onrender.com/app/showAllBooks"
-          : "hhttps://book-service-ngjz.onrender.com/app/showBooksBySeller/" +
+          : "https://book-service-ngjz.onrender.com/app/showBooksBySeller/" +
               userSId
       )
       .then((res) => {
