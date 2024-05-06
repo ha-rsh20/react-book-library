@@ -1,0 +1,15 @@
+.btn {
+  background-color: blue;
+  text-align: center;
+  color: aliceblue;
+}
+
+.mycard {
+  width: 15rem;
+}
+
+@media only screen and (max-width: 768px) {
+  .mycard {
+    width: 13rem;
+  }
+}
