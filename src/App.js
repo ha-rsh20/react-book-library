@@ -18,7 +18,7 @@ import Statistics from "./components/Statistics";
 
 function App() {
   return (
-    <div>
+    <div className="App">
       <BrowserRouter>
         <Provider store={store}>
           <NavBar />
