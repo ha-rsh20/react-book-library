@@ -8,8 +8,22 @@
   width: 15rem;
 }
 
+.loader {
+  height: 50px;
+  width: 50px;
+  border: 10px solid black;
+  border-radius: 50%;
+  border-top: 10px solid rgb(152, 152, 152);
+  animation: loadingAnimation 1.7s infinite;
+}
 @media only screen and (max-width: 768px) {
   .mycard {
     width: 13rem;
+  }
+}
+
+@keyframes loadingAnimation {
+  100% {
+    transform: rotate(720deg);
   }
 }

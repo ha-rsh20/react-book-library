@@ -54,7 +54,9 @@ function UpdateBook() {
   const onBookUpdate = (values, { resetForm }) => {
     values.cover = base64Image;
     axios
-      .put("http://localhost:4000/app/updateBook/" + bookid, values)
+      .put("http://localhost:4000/book/updateBook/" + bookid, values, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      })
       .then((res) => {
         if (res.status === 200) {
           toast.success("Book updated!", {

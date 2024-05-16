@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Formik } from "formik";
 import * as Yup from "yup";
 import { Button, ThemeProvider } from "@mui/material";
@@ -16,8 +16,6 @@ import { updateUserId } from "../state/slice/userSlice";
 import { updateUserLoggedIn } from "../state/slice/userSlice";
 
 function Login() {
-  const [users, setUsers] = useState([]);
-  let [user, setUser] = useState("");
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -32,25 +30,6 @@ function Login() {
     password: Yup.string().required("Please type your password"),
   });
 
-  useEffect(() => {
-    axios
-      .get("http://localhost:4000/app/showAllUsers")
-      .then((res) => {
-        setUsers(res.data);
-      })
-      .catch((err) => {
-        toast.error("Netowrk error!", {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "dark",
-        });
-      });
-  });
   const setUp = (fname, lname, id, role) => {
     dispatch(updateUserFirstName(fname));
     dispatch(updateUserLastName(lname));
@@ -63,49 +42,78 @@ function Login() {
     localStorage.setItem("id", id);
     localStorage.setItem("role", role);
   };
+
   const onLogin = (values) => {
-    user = users.filter((u) => u.email.includes(values.email));
-    if (user.length === 0) {
-      toast.error("Email not registered!", {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "dark",
+    let cred = {
+      email: values.email,
+      password: values.password,
+    };
+    axios
+      .post("http://localhost:4000/user/login", cred)
+      .then((res) => {
+        if (res.status === 201) {
+          localStorage.setItem("token", res.data.accessToken);
+          localStorage.setItem("rtoken", res.data.refreshToken);
+
+          setUp(
+            res.data.user.firstname,
+            res.data.user.lastname,
+            res.data.user.id,
+            res.data.user.role
+          );
+
+          toast.success("Login Successful!", {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "dark",
+          });
+
+          setTimeout(() => {
+            navigate("/");
+          }, 2000);
+        } else if (res.status === 203) {
+          toast.error("Invalid password!", {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "dark",
+          });
+        } else if (res.status === 204) {
+          toast.error("Credential not found!", {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "dark",
+          });
+        }
+      })
+      .catch((err) => {
+        toast.error("Error Occured!", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+        });
       });
-    } else if (
-      user[0].email === values.email &&
-      user[0].password === values.password
-    ) {
-      setUp(user[0].firstname, user[0].lastname, user[0].id, user[0].role);
-      navigate("/");
-    } else if (user[0].password !== values.password) {
-      toast.error("Invalid Password!", {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "dark",
-      });
-    } else {
-      toast.error("Network Error!", {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "dark",
-      });
-    }
   };
+
   return (
     <div
       style={{

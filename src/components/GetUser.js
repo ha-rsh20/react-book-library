@@ -53,7 +53,9 @@ function GetUser() {
 
   const onDelete = (id) => {
     axios
-      .delete("http://localhost:4000/app/deleteUser/" + id)
+      .delete("http://localhost:4000/user/deleteUser/" + id, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      })
       .then((res) => {
         if (res.status === 200) {
           toast.success("User deleted successfully!", {
@@ -86,111 +88,122 @@ function GetUser() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:4000/app/showAllUsers")
+      .get("http://localhost:4000/user/showAllUsers", {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      })
       .then((res) => {
         setUser(res.data);
-        toast.success("Success on fetching user details!", {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "dark",
-        });
       })
       .catch((err) => {
-        toast.error("Error in fetching user details!", {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "dark",
-        });
+        if (err.response.status === 401) {
+          toast.error("Un-Authorized Access!", {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "dark",
+          });
+        } else {
+          toast.error("Error in fetching user details!", {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "dark",
+          });
+        }
       });
   }, []);
   return (
     <div className="App" style={{ padding: 20 }}>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-        }}
-      >
-        <div style={{ display: "flex", flexDirection: "column" }}>
-          <TextField
-            id="filled-basic"
-            label="Search"
-            variant="filled"
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
+      {user.length === 0 ? (
+        <div style={{ display: "flex", justifyContent: "center" }}>
+          <div className="loader"></div>
+        </div>
+      ) : (
+        <div>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
             }}
-          />
-        </div>
-      </div>
-
-      <div className="container" style={{ marginBottom: 20 }}>
-        <div className="row">
-          <div className="col-1">First name</div>
-          <div className="col-1">Last name</div>
-          <div className="col-4">Email</div>
-          <div className="col-1">Role</div>
-          <div className="col-4">Modify</div>
-        </div>
-      </div>
-      <ThemeProvider theme={theme}>
-        {currentPosts.map((item) => (
-          <div key={item.id} className="container">
-            <div className="row">
-              <span className="col-1" style={{ paddingTop: 15 }}>
-                {item.firstname}
-              </span>
-              <span className="col-1" style={{ paddingTop: 15 }}>
-                {item.lastname}
-              </span>
-              <span className="col-4" style={{ paddingTop: 15 }}>
-                {item.email}
-              </span>
-              <span className="col-1" style={{ paddingTop: 15 }}>
-                {item.role}
-              </span>
-              <span className="col-4">
-                <Button
-                  type="submit"
-                  variant="contained"
-                  style={{ margin: 10 }}
-                  onClick={() => {
-                    navigate("/updateProfile/" + item.id);
-                  }}
-                >
-                  update
-                </Button>
-                <Button
-                  variant="contained"
-                  style={{ margin: 10 }}
-                  onClick={() => onDelete(item.id)}
-                >
-                  delete
-                </Button>
-              </span>
-              <hr></hr>
+          >
+            <div style={{ display: "flex", flexDirection: "column" }}>
+              <TextField
+                id="filled-basic"
+                label="Search"
+                variant="filled"
+                value={search}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                }}
+              />
             </div>
           </div>
-        ))}
-        <div
-          style={{
-            margin: 10,
-            marginBottom: 70,
-            display: "flex",
-            justifyContent: "center",
-          }}
-        >
-          {/* <TextField
+
+          <div className="container" style={{ marginBottom: 20 }}>
+            <div className="row">
+              <div className="col-1">First name</div>
+              <div className="col-1">Last name</div>
+              <div className="col-4">Email</div>
+              <div className="col-1">Role</div>
+              <div className="col-4">Modify</div>
+            </div>
+          </div>
+          <ThemeProvider theme={theme}>
+            {currentPosts.map((item) => (
+              <div key={item.id} className="container">
+                <div className="row">
+                  <span className="col-1" style={{ paddingTop: 15 }}>
+                    {item.firstname}
+                  </span>
+                  <span className="col-1" style={{ paddingTop: 15 }}>
+                    {item.lastname}
+                  </span>
+                  <span className="col-4" style={{ paddingTop: 15 }}>
+                    {item.email}
+                  </span>
+                  <span className="col-1" style={{ paddingTop: 15 }}>
+                    {item.role}
+                  </span>
+                  <span className="col-4">
+                    <Button
+                      type="submit"
+                      variant="contained"
+                      style={{ margin: 10 }}
+                      onClick={() => {
+                        navigate("/updateProfile/" + item.id);
+                      }}
+                    >
+                      update
+                    </Button>
+                    <Button
+                      variant="contained"
+                      style={{ margin: 10 }}
+                      onClick={() => onDelete(item.id)}
+                    >
+                      delete
+                    </Button>
+                  </span>
+                  <hr></hr>
+                </div>
+              </div>
+            ))}
+            <div
+              style={{
+                margin: 10,
+                marginBottom: 70,
+                display: "flex",
+                justifyContent: "center",
+              }}
+            >
+              {/* <TextField
             id="filled-select-currency"
             select
             label="Select"
@@ -205,14 +218,16 @@ function GetUser() {
               </MenuItem>
             ))}
           </TextField> */}
-          <Pagination
-            postPerPage={postPerPage}
-            totalPosts={user.length}
-            paginate={paginate}
-            currentPage={page}
-          />
+              <Pagination
+                postPerPage={postPerPage}
+                totalPosts={user.length}
+                paginate={paginate}
+                currentPage={page}
+              />
+            </div>
+          </ThemeProvider>
         </div>
-      </ThemeProvider>
+      )}
       <ToastContainer />
     </div>
   );

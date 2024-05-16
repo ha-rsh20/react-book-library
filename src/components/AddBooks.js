@@ -9,7 +9,6 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function AddBooks() {
-  const [book, setBook] = useState([]);
   const initialValues = {
     id: "",
     sid: "",
@@ -33,15 +32,6 @@ export default function AddBooks() {
     pages: Yup.string().required("Please enter no of pages of the book"),
   });
 
-  useEffect(() => {
-    axios
-      .get("http://localhost:4000/app/showAllBooks")
-      .then((res) => {
-        setBook(res.data);
-      })
-      .catch();
-  }, []);
-
   const handleCoverUpload = (event) => {
     const file = event.target.files[0];
     const reader = new FileReader();
@@ -57,20 +47,11 @@ export default function AddBooks() {
   };
 
   const onFormSubmit = (values, { resetForm }) => {
-    values.id = book[book.length - 1].id + 1;
-
-    if (localStorage.getItem("id")) {
-      values.sid = localStorage.getItem("id");
-    }
-    if (localStorage.getItem("firstname") && localStorage.getItem("lastname")) {
-      values.sname =
-        localStorage.getItem("firstname") +
-        " " +
-        localStorage.getItem("lastname");
-    }
     values.cover = base64Image;
     axios
-      .post("http://localhost:4000/app/addBook", values)
+      .post("http://localhost:4000/book/addBook", values, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      })
       .then((res) => {
         if (res.status === 201) {
           toast.success("Book added!", {

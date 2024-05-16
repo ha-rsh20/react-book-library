@@ -80,7 +80,9 @@ function GetBook(props) {
 
   const onDelete = (id) => {
     axios
-      .delete("http://localhost:4000/app/deleteBook/" + id)
+      .delete("http://localhost:4000/book/deleteBook/" + id, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      })
       .then((res) => {
         if (res.status === 200) {
           toast.success("Book removed successfully!", {
@@ -135,8 +137,11 @@ function GetBook(props) {
     axios
       .get(
         userRole === "Admin" || props.path === "Home"
-          ? "http://localhost:4000/app/showAllBooks"
-          : "http://localhost:4000/app/showBooksBySeller/" + userSId
+          ? "http://localhost:4000/book/showAllBooks"
+          : "http://localhost:4000/book/showBooksBySeller/" + userSId,
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        }
       )
       .then((res) => {
         setBooks(res.data);
@@ -157,27 +162,22 @@ function GetBook(props) {
 
   const toCart = async (uid, bid, book) => {
     if (userSId !== undefined) {
-      await axios
-        .get("http://localhost:4000/app/getCartId")
-        .then((res) => {
-          cartId = res.data.cid;
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-
       let cartBook = {
         name: book.name,
         description: book.description,
         page: book.page,
         price: book.price,
-        cid: cartId + 1,
       };
 
       axios
         .post(
-          "http://localhost:4000/app/addToCart/" + uid + "/" + bid,
-          cartBook
+          "http://localhost:4000/cart/addToCart/" + uid + "/" + bid,
+          cartBook,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
         )
         .then((res) => {
           toast.success("Book added to cart!", {
@@ -215,115 +215,126 @@ function GetBook(props) {
 
   return (
     <div className="App" style={{ padding: 20 }}>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-        }}
-      >
-        <div style={{ display: "flex", flexDirection: "column" }}>
-          <TextField
-            id="filled-basic"
-            label="Search"
-            variant="filled"
-            value={search}
-            onChange={(e) => handleSearch(e)}
-          />
-        </div>
-      </div>
-
-      <ThemeProvider theme={theme}>
-        <Row style={{ margin: 30 }}>
-          {currentPosts.map((item) => (
-            <Col key={item.id} style={{ margin: 20 }}>
-              <Card className="mycard">
-                <Card.Img variant="top" src={item.cover} loading="lazy" />
-                <Card.Body>
-                  <Card.Title>{item.name}</Card.Title>
-                  <div style={{ height: "10rem" }}>
-                    <Card.Text
-                      className="card-text"
-                      style={{ overflow: "hidden" }}
-                    >
-                      {item.description}
-                    </Card.Text>
-                  </div>
-                </Card.Body>
-                <ListGroup className="list-group-flush">
-                  <ListGroup.Item>Price: ₹ {item.price}</ListGroup.Item>
-                </ListGroup>
-                <ListGroup className="list-group-flush">
-                  <ListGroup.Item>Pages: {item.page}</ListGroup.Item>
-                </ListGroup>
-                {props.path === "Home" || userRole === "Admin" ? (
-                  <ListGroup className="list-group-flush">
-                    <ListGroup.Item>Seller: {item.sname}</ListGroup.Item>
-                  </ListGroup>
-                ) : (
-                  <ListGroup className="list-group-flush">
-                    <ListGroup.Item>Selling: {item.selling}</ListGroup.Item>
-                  </ListGroup>
-                )}
-
-                {props.path === "Home" ? (
-                  <Card.Body
-                    style={{ display: "flex", justifyContent: "center" }}
-                  >
-                    <Button
-                      variant="contained"
-                      onClick={() => toCart(userSId, item.id, item)}
-                    >
-                      To cart
-                    </Button>
-                  </Card.Body>
-                ) : (
-                  <div>
-                    <Card.Body
-                      style={{ display: "flex", justifyContent: "center" }}
-                    >
-                      <Button
-                        type="submit"
-                        variant="contained"
-                        style={{ margin: 10, marginBottom: 0 }}
-                        onClick={() => toUpdate(item)}
-                      >
-                        update
-                      </Button>
-                      <Button
-                        variant="contained"
-                        style={{ margin: 10, marginBottom: 0 }}
-                        onClick={() => onDelete(item.id)}
-                      >
-                        delete
-                      </Button>
-                    </Card.Body>
-                    {userRole != "Admin" ? (
-                      <Card.Body>
-                        <Button
-                          variant="contained"
-                          onClick={() => navigate("/statistics/" + item.id)}
-                        >
-                          Statistics
-                        </Button>
-                      </Card.Body>
-                    ) : (
-                      <div />
-                    )}
-                  </div>
-                )}
-              </Card>
-            </Col>
-          ))}
-        </Row>
+      {books.length === 0 ? (
         <div
           style={{
-            margin: 10,
-            marginBottom: 70,
             display: "flex",
             justifyContent: "center",
           }}
         >
-          {/* <TextField
+          <div className="loader"></div>
+        </div>
+      ) : (
+        <div>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+            }}
+          >
+            <div style={{ display: "flex", flexDirection: "column" }}>
+              <TextField
+                id="filled-basic"
+                label="Search"
+                variant="filled"
+                value={search}
+                onChange={(e) => handleSearch(e)}
+              />
+            </div>
+          </div>
+
+          <ThemeProvider theme={theme}>
+            <Row style={{ margin: 30 }}>
+              {currentPosts.map((item) => (
+                <Col key={item.id} style={{ margin: 20 }}>
+                  <Card className="mycard">
+                    <Card.Img variant="top" src={item.cover} loading="lazy" />
+                    <Card.Body>
+                      <Card.Title>{item.name}</Card.Title>
+                      <div style={{ height: "10rem" }}>
+                        <Card.Text
+                          className="card-text"
+                          style={{ overflow: "hidden" }}
+                        >
+                          {item.description}
+                        </Card.Text>
+                      </div>
+                    </Card.Body>
+                    <ListGroup className="list-group-flush">
+                      <ListGroup.Item>Price: ₹ {item.price}</ListGroup.Item>
+                    </ListGroup>
+                    <ListGroup className="list-group-flush">
+                      <ListGroup.Item>Pages: {item.page}</ListGroup.Item>
+                    </ListGroup>
+                    {props.path === "Home" || userRole === "Admin" ? (
+                      <ListGroup className="list-group-flush">
+                        <ListGroup.Item>Seller: {item.sname}</ListGroup.Item>
+                      </ListGroup>
+                    ) : (
+                      <ListGroup className="list-group-flush">
+                        <ListGroup.Item>Selling: {item.selling}</ListGroup.Item>
+                      </ListGroup>
+                    )}
+
+                    {props.path === "Home" ? (
+                      <Card.Body
+                        style={{ display: "flex", justifyContent: "center" }}
+                      >
+                        <Button
+                          variant="contained"
+                          onClick={() => toCart(userSId, item.id, item)}
+                        >
+                          To cart
+                        </Button>
+                      </Card.Body>
+                    ) : (
+                      <div>
+                        <Card.Body
+                          style={{ display: "flex", justifyContent: "center" }}
+                        >
+                          <Button
+                            type="submit"
+                            variant="contained"
+                            style={{ margin: 10, marginBottom: 0 }}
+                            onClick={() => toUpdate(item)}
+                          >
+                            update
+                          </Button>
+                          <Button
+                            variant="contained"
+                            style={{ margin: 10, marginBottom: 0 }}
+                            onClick={() => onDelete(item.id)}
+                          >
+                            delete
+                          </Button>
+                        </Card.Body>
+                        {userRole != "Admin" ? (
+                          <Card.Body>
+                            <Button
+                              variant="contained"
+                              onClick={() => navigate("/statistics/" + item.id)}
+                            >
+                              Statistics
+                            </Button>
+                          </Card.Body>
+                        ) : (
+                          <div />
+                        )}
+                      </div>
+                    )}
+                  </Card>
+                </Col>
+              ))}
+            </Row>
+            <div
+              style={{
+                margin: 10,
+                marginBottom: 70,
+                display: "flex",
+                justifyContent: "center",
+              }}
+            >
+              {/* <TextField
             id="filled-select-currency"
             select
             label="Select"
@@ -338,15 +349,17 @@ function GetBook(props) {
               </MenuItem>
             ))}
           </TextField> */}
-          <Pagination
-            postPerPage={postPerPage}
-            totalPosts={books.length}
-            paginate={paginate}
-            currentPage={page}
-          />
+              <Pagination
+                postPerPage={postPerPage}
+                totalPosts={books.length}
+                paginate={paginate}
+                currentPage={page}
+              />
+            </div>
+          </ThemeProvider>
+          <ToastContainer />
         </div>
-      </ThemeProvider>
-      <ToastContainer />
+      )}
     </div>
   );
 }

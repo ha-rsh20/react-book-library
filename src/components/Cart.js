@@ -19,6 +19,7 @@ import {
 } from "../state/slice/cartSlice";
 import { updateUserFirstName, updateUserId } from "../state/slice/userSlice";
 import MenuItem from "@mui/material/MenuItem";
+import "./MyStyle.css";
 
 export default function Cart() {
   const [cartBook, setCartBook] = useState([]);
@@ -95,16 +96,22 @@ export default function Cart() {
       id = localStorage.getItem("id");
       dispatch(updateUserId(id));
     }
+    let data = {
+      token: localStorage.getItem("token"),
+    };
     axios
-      .get("http://localhost:4000/app/showAllBooks")
+      .get("http://localhost:4000/book/showAllBooks")
       .then((res) => {
         setBooks(res.data);
       })
       .catch((err) => {
         console.log(err);
       });
+
     axios
-      .get("http://localhost:4000/app/showCart/" + id)
+      .get("http://localhost:4000/cart/showCart/" + id, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      })
       .then((res) => {
         setCartBook(res.data);
         setup(
@@ -128,33 +135,35 @@ export default function Cart() {
       });
   }, [quantity]);
 
-  const incrementQuantity = (cid, item) => {
+  const incrementQuantity = async (cid, item) => {
     temp = cartBook.filter((book) => book.cid === cid)[0].quantity;
     cartBook.filter((book) => book.cid === cid)[0].quantity = temp + 1;
     setCartBook((cartBook) => {
       return cartBook;
     });
-    onSave(item);
+    await onSave(item);
     // setTotal(total + item.quantity * item.price);
     setQuantity(quantity + 1);
   };
 
-  const decrementQuantity = (cid, item) => {
+  const decrementQuantity = async (cid, item) => {
     temp = cartBook.filter((book) => book.cid === cid)[0].quantity;
     if (temp !== 1) {
       cartBook.filter((book) => book.cid === cid)[0].quantity = temp - 1;
       setCartBook((cartBook) => {
         return cartBook;
       });
-      onSave(item);
+      await onSave(item);
       // setTotal(total - item.quantity * item.price);
     }
     setQuantity(quantity + 1);
   };
 
-  const onSave = (item) => {
-    axios
-      .put("http://localhost:4000/app/updateCartQuantity/" + item.cid, item)
+  const onSave = async (item) => {
+    await axios
+      .put("http://localhost:4000/cart/updateCartQuantity/" + item.cid, item, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      })
       .then((res) => {})
       .catch((err) => {
         toast.error("Book updated!", {
@@ -178,7 +187,9 @@ export default function Cart() {
       quantity: quantity.toString(),
     };
     axios
-      .delete("http://localhost:4000/app/deleteCart/" + userSId + "/" + bid)
+      .delete("http://localhost:4000/cart/deleteCart/" + userSId + "/" + bid, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      })
       .then((res) => {
         if (res.status === 200) {
           toast.success(
@@ -198,10 +209,11 @@ export default function Cart() {
           );
           isPlaced
             ? axios
-                .put(
-                  "http://localhost:4000/app/bookSell/" + bid + "/" + cid,
-                  arr
-                )
+                .put("http://localhost:4000/book/bookSell/" + bid + "/" + cid, {
+                  headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                  },
+                })
                 .then((res) => {
                   console.log("Book " + bid + " selled");
                 })
@@ -231,102 +243,108 @@ export default function Cart() {
   };
 
   return (
-    <div className="App">
+    <div className="App" style={{ padding: 20 }}>
       <ThemeProvider theme={theme}>
-        <TextField
-          id="filled-basic"
-          label="Search"
-          variant="filled"
-          value={search}
-          style={{ marginTop: 20 }}
-          onChange={(e) => {
-            setSearch(e.target.value);
-          }}
-        />
-        <div style={{ padding: 20 }}>
-          <div className="container" style={{ marginBottom: 20 }}>
-            <div className="row">
-              <div className="col-2">Name</div>
-              <div className="col-1">Price</div>
-              <div className="col-1">Pages</div>
-              <div className="col-2">Quantity</div>
-            </div>
+        {cartBook.length === 0 ? (
+          <div style={{ display: "flex", justifyContent: "center" }}>
+            <div className="loader"></div>
           </div>
-          {currentPosts.map((item) => (
-            <div key={item.cid} className="container">
+        ) : (
+          <div>
+            <TextField
+              id="filled-basic"
+              label="Search"
+              variant="filled"
+              value={search}
+              style={{ marginTop: 20 }}
+              onChange={(e) => {
+                setSearch(e.target.value);
+              }}
+            />
+            <div style={{ padding: 20 }}>
+              <div className="container" style={{ marginBottom: 20 }}>
+                <div className="row">
+                  <div className="col-2">Name</div>
+                  <div className="col-1">Price</div>
+                  <div className="col-1">Pages</div>
+                  <div className="col-2">Quantity</div>
+                </div>
+              </div>
+              {currentPosts.map((item) => (
+                <div key={item.cid} className="container">
+                  <div className="row">
+                    <span className="col-2" style={{ paddingTop: 15 }}>
+                      {item.name}
+                    </span>
+                    <span className="col-1" style={{ paddingTop: 15 }}>
+                      ₹ {item.price}
+                    </span>
+                    <span className="col-1" style={{ paddingTop: 15 }}>
+                      {item.page}
+                    </span>
+                    <span
+                      className="col-2"
+                      style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                      }}
+                    >
+                      <Button
+                        onClick={() => {
+                          incrementQuantity(item.cid, item);
+                        }}
+                      >
+                        <AddCircleIcon />
+                      </Button>
+                      {item.quantity}
+                      <Button
+                        onClick={() => {
+                          decrementQuantity(item.cid, item);
+                        }}
+                      >
+                        <RemoveCircleIcon />
+                      </Button>
+                    </span>
+                    <span className="col-4" style={{ display: "inline" }}>
+                      <Button
+                        variant="contained"
+                        style={{ margin: 10 }}
+                        onClick={() => {
+                          onDelete(item.bookid, false, item.cid, item.quantity);
+                        }}
+                      >
+                        delete
+                      </Button>
+                      <Button
+                        variant="contained"
+                        style={{ margin: 10 }}
+                        onClick={() => {
+                          onDelete(item.bookid, true, item.cid, item.quantity);
+                        }}
+                      >
+                        Place order
+                      </Button>
+                    </span>
+                    <hr></hr>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="container">
               <div className="row">
-                <span className="col-2" style={{ paddingTop: 15 }}>
-                  {item.name}
-                </span>
-                <span className="col-1" style={{ paddingTop: 15 }}>
-                  ₹ {item.price}
-                </span>
-                <span className="col-1" style={{ paddingTop: 15 }}>
-                  {item.page}
-                </span>
-                <span
-                  className="col-2"
-                  style={{
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                  }}
-                >
-                  <Button
-                    onClick={() => {
-                      incrementQuantity(item.cid, item);
-                    }}
-                  >
-                    <AddCircleIcon />
-                  </Button>
-                  {item.quantity}
-                  <Button
-                    onClick={() => {
-                      decrementQuantity(item.cid, item);
-                    }}
-                  >
-                    <RemoveCircleIcon />
-                  </Button>
-                </span>
-                <span className="col-4" style={{ display: "inline" }}>
-                  <Button
-                    variant="contained"
-                    style={{ margin: 10 }}
-                    onClick={() => {
-                      onDelete(item.bookid, false, item.cid, item.quantity);
-                    }}
-                  >
-                    delete
-                  </Button>
-                  <Button
-                    variant="contained"
-                    style={{ margin: 10 }}
-                    onClick={() => {
-                      onDelete(item.bookid, true, item.cid, item.quantity);
-                    }}
-                  >
-                    Place order
-                  </Button>
-                </span>
-                <hr></hr>
+                <span className="col-2">Total: ₹ {total.toFixed(2)}</span>
               </div>
             </div>
-          ))}
-        </div>
-        <div className="container">
-          <div className="row">
-            <span className="col-2">Total: ₹ {total.toFixed(2)}</span>
-          </div>
-        </div>
-        <div
-          style={{
-            margin: 10,
-            marginBottom: 70,
-            display: "flex",
-            justifyContent: "center",
-          }}
-        >
-          {/* <TextField
+            <div
+              style={{
+                margin: 10,
+                marginBottom: 70,
+                display: "flex",
+                justifyContent: "center",
+              }}
+            >
+              {/* <TextField
             id="filled-select-currency"
             select
             label="Select"
@@ -341,14 +359,16 @@ export default function Cart() {
               </MenuItem>
             ))}
           </TextField> */}
-          <Pagination
-            postPerPage={postPerPage}
-            totalPosts={cartBook.length}
-            paginate={paginate}
-            currentPage={page}
-          />
-        </div>
-        <ToastContainer />
+              <Pagination
+                postPerPage={postPerPage}
+                totalPosts={cartBook.length}
+                paginate={paginate}
+                currentPage={page}
+              />
+            </div>
+            <ToastContainer />
+          </div>
+        )}
       </ThemeProvider>
     </div>
   );

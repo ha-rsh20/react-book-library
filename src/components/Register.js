@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { Formik } from "formik";
 import * as Yup from "yup";
 import { Button, ThemeProvider } from "@mui/material";
@@ -13,10 +13,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { updateUserRole } from "../state/slice/userSlice";
 
 function Register() {
-  const [user, setUser] = useState();
   const navigate = useNavigate();
   const initialValues = {
-    id: "",
+    id: "0",
     firstname: "",
     lastname: "",
     email: "",
@@ -70,22 +69,16 @@ function Register() {
     if (localStorage.getItem("role")) {
       dispatch(updateUserRole(localStorage.getItem("role")));
     }
-    axios
-      .get("http://localhost:4000/app/showAllUsers")
-      .then((res) => {
-        setUser(res.data);
-      })
-      .catch();
   }, []);
 
-  const onFormSubmit = (values) => {
-    values.id = user[user.length - 1].id + 1;
-
+  const onRegister = (values) => {
     axios
-      .post("http://localhost:4000/app/addUser", values)
+      .post("http://localhost:4000/user/register", values)
       .then((res) => {
-        if (res.status === 201) {
-          toast.success("Registered successfully!", {
+        if (res.status === 200) {
+          navigate("/login");
+        } else if (res.status === 202) {
+          toast.error("Already Registered!", {
             position: "top-right",
             autoClose: 3000,
             hideProgressBar: false,
@@ -95,11 +88,9 @@ function Register() {
             progress: undefined,
             theme: "dark",
           });
-          navigate("/login");
         }
       })
       .catch((err) => {
-        console.log(err);
         toast.error("Error occured to register!", {
           position: "top-right",
           autoClose: 3000,
@@ -125,7 +116,7 @@ function Register() {
       <Formik
         initialValues={initialValues}
         validationSchema={validationSchema}
-        onSubmit={onFormSubmit}
+        onSubmit={onRegister}
       >
         {(formik) => (
           <form onSubmit={formik.handleSubmit}>

@@ -18,8 +18,6 @@ import MenuItem from "@mui/material/MenuItem";
 import * as Yup from "yup";
 
 function UpdateProfile() {
-  const [pass, setPass] = useState();
-  const [role, setRole] = useState();
   let userSId = useSelector((state) => state.users.id);
   const { id } = useParams();
   let userRole = useSelector((state) => state.users.role);
@@ -73,15 +71,14 @@ function UpdateProfile() {
       dispatch(updateUserRole(localStorage.getItem("role")));
     }
     axios
-      .get("http://localhost:4000/app/showUser/" + userSId)
+      .get("http://localhost:4000/user/showUser/" + userSId, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      })
       .then((res) => {
-        if (res.status === 200) {
-          initialValues.firstname = res.data.firstname;
-          initialValues.lastname = res.data.lastname;
-          initialValues.email = res.data.email;
-          initialValues.role = res.data.role;
-          setPass(res.data.password);
-        }
+        initialValues.firstname = res.data.firstname;
+        initialValues.lastname = res.data.lastname;
+        initialValues.email = res.data.email;
+        initialValues.role = res.data.role;
       })
       .catch((err) => {
         console.log(err);
@@ -98,34 +95,20 @@ function UpdateProfile() {
   };
 
   const onUpdate = (values) => {
-    if (pass === values.password) {
-      axios
-        .put("http://localhost:4000/app/updateUser/" + userSId, values)
-        .then((res) => {
-          if (res.status === 200) {
-            {
-              id === undefined ? (
-                setupUpdate(values.firstname, values.lastname, values.role)
-              ) : (
-                <div></div>
-              );
-            }
-            toast.success("Updated successfully!", {
-              position: "top-right",
-              autoClose: 3000,
-              hideProgressBar: false,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: true,
-              progress: undefined,
-              theme: "dark",
-            });
+    axios
+      .put("http://localhost:4000/user/updateUser/" + userSId, values, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      })
+      .then((res) => {
+        if (res.status === 200) {
+          {
+            id === undefined ? (
+              setupUpdate(values.firstname, values.lastname, values.role)
+            ) : (
+              <div></div>
+            );
           }
-          navigate("/");
-        })
-        .catch((err) => {
-          console.log(err);
-          toast.error("Error occured to update!", {
+          toast.success("Updated successfully!", {
             position: "top-right",
             autoClose: 3000,
             hideProgressBar: false,
@@ -135,19 +118,22 @@ function UpdateProfile() {
             progress: undefined,
             theme: "dark",
           });
+        }
+        navigate("/");
+      })
+      .catch((err) => {
+        console.log(err);
+        toast.error("Error occured to update!", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
         });
-    } else {
-      toast.error("Wrong password!", {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "dark",
       });
-    }
   };
 
   return (

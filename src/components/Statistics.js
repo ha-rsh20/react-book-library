@@ -19,7 +19,7 @@ function Statistics() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:4000/app/showBook/" + bid)
+      .get("http://localhost:4000/book/showBook/" + bid)
       .then((res) => {
         book = res.data;
         console.log(book);
